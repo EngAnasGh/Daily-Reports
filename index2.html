@@ -81,6 +81,7 @@
   .tag-sealant   { background: rgba(139,92,246,0.12); border-color: rgba(139,92,246,0.2); color: #a78bfa; }
   .tag-repairing { background: rgba(20,184,166,0.12); border-color: rgba(20,184,166,0.2); color: #2dd4bf; }
   .tag-mep       { background: rgba(249,115,22,0.12); border-color: rgba(249,115,22,0.2); color: #fb923c; }
+  .tag-offloading{ background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.2); color: #818cf8; }
 
   .villa-header { display: grid; grid-template-columns: 1fr 90px; gap: 6px; margin-bottom: 4px; padding: 0 2px; }
   .villa-header span { font-size: 10px; font-weight: 600; color: var(--muted); }
@@ -377,6 +378,7 @@ const WORKS = [
   { key:'sealant',   tagClass:'tag-sealant',   ar:'سيلانت',            en:'Sealant' },
   { key:'repairing', tagClass:'tag-repairing', ar:'ترميم / تجهيز سطح', en:'Repairing & Surface Prep' },
   { key:'mep',       tagClass:'tag-mep',       ar:'MEP / تصبيب',       en:'MEP Fixation & Topping' },
+  { key:'offloading',tagClass:'tag-offloading',ar:'تشوين',             en:'Offloading' },
 ];
 const FLOORS = ['GF Panels','FF HCS','FF Panels','SF HCS','SF Panels','UR HCS'];
 let currentLang = 'ar';
@@ -616,7 +618,7 @@ function showToast(msg, type='loading') {
 
 // ─── Send to Google Sheets + WhatsApp ─────────────────────
 async function sendToSheets(payload) {
-  if (APPS_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbwYhSP09cSA-ZJJaH9YjftE2gASjitlnJ9Ct5KzPNH9gnEESfpkqRAu8Mv9FEcRckng/exec') return true; // skip if not configured
+  if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return true; // skip if not configured
   const resp = await fetch(APPS_SCRIPT_URL, {
     method: 'POST',
     body: JSON.stringify(payload)
