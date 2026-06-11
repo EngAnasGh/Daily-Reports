@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Site Report | تقرير الموقع اليومي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #222636; --border: #2e3347;
+    --accent: #f5a623; --green: #22c55e; --red: #ef4444;
+    --text: #e8eaf0; --muted: #6b7280; --morning: #f5a623; --evening: #3b82f6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 16px; }
+
+  .lang-bar { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
+  .lang-btn { padding: 8px 22px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .lang-btn.active { background: var(--accent); color: #0f1117; border-color: var(--accent); }
+
+  .header { text-align: center; padding: 20px 20px 16px; margin-bottom: 20px; }
+  .header::after { content: ''; display: block; width: 60px; height: 3px; background: var(--accent); margin: 12px auto 0; border-radius: 2px; }
+  .header-badge { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+  .header h1 { font-size: 20px; font-weight: 900; color: var(--text); line-height: 1.3; }
+  .header h1 span { color: var(--accent); }
+
+  .tab-switcher { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; background: var(--surface); padding: 6px; border-radius: 14px; border: 1px solid var(--border); }
+  .tab-btn { padding: 12px 8px; border: none; border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700; transition: all 0.25s; background: transparent; color: var(--muted); }
+  .tab-btn.active-morning { background: var(--morning); color: #0f1117; }
+  .tab-btn.active-evening { background: var(--evening); color: #fff; }
+  .tab-icon { font-size: 16px; display: block; margin-bottom: 2px; }
+
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 14px; overflow: hidden; }
+  .section-header { padding: 14px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+  .section-header.morning { background: rgba(245,166,35,0.08); }
+  .section-header.evening { background: rgba(59,130,246,0.08); }
+  .section-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .morning .section-icon { background: rgba(245,166,35,0.15); }
+  .evening .section-icon { background: rgba(59,130,246,0.15); }
+  .section-title { font-size: 14px; font-weight: 700; }
+  .section-subtitle { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .section-body { padding: 14px 16px; }
+
+  input[type="text"], input[type="date"], input[type="number"], textarea, select {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 12px; color: var(--text); font-family: 'Cairo', sans-serif; font-size: 13px;
+    outline: none; transition: border-color 0.2s; -webkit-appearance: none;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
+  select option { background: var(--surface2); }
+
+  /* Contractor selector */
+  .contractor-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: end; }
+  .add-contractor-btn {
+    padding: 10px 14px; background: var(--surface2); border: 1px dashed var(--border);
+    border-radius: 10px; color: var(--muted); font-family: 'Cairo', sans-serif;
+    font-size: 12px; cursor: pointer; white-space: nowrap; transition: all 0.2s;
+  }
+  .add-contractor-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .mp-free-row, .eq-free-row { display: grid; grid-template-columns: 1fr 80px; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .mp-free-row input[type="number"], .eq-free-row input[type="number"] { text-align: center; font-weight: 700; font-size: 16px; }
+
+  .block-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
+  .block-toggle { padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; transition: background 0.2s; }
+  .block-toggle:hover { background: rgba(255,255,255,0.04); }
+  .block-toggle-left { display: flex; align-items: center; gap: 10px; }
+  .block-name { font-size: 13px; font-weight: 700; }
+  .block-range { font-size: 10px; font-family: 'IBM Plex Mono', monospace; color: var(--muted); }
+  .block-chevron { font-size: 12px; color: var(--muted); transition: transform 0.25s; }
+  .block-card.open .block-chevron { transform: rotate(180deg); }
+  .block-body { padding: 12px 14px; display: none; border-top: 1px solid var(--border); }
+  .block-card.open .block-body { display: block; }
+
+  .work-row { display: grid; grid-template-columns: 110px 1fr; gap: 8px; margin-bottom: 10px; align-items: start; }
+  .work-tag { padding: 9px 8px; border-radius: 8px; font-size: 10px; font-weight: 700; text-align: center; border: 1px solid transparent; line-height: 1.4; }
+  .tag-erection  { background: rgba(239,68,68,0.12);  border-color: rgba(239,68,68,0.2);  color: #f87171; }
+  .tag-alignment { background: rgba(245,166,35,0.12); border-color: rgba(245,166,35,0.2); color: #fbbf24; }
+  .tag-grouting  { background: rgba(34,197,94,0.12);  border-color: rgba(34,197,94,0.2);  color: #4ade80; }
+  .tag-sealant   { background: rgba(139,92,246,0.12); border-color: rgba(139,92,246,0.2); color: #a78bfa; }
+  .tag-repairing { background: rgba(20,184,166,0.12); border-color: rgba(20,184,166,0.2); color: #2dd4bf; }
+  .tag-mep       { background: rgba(249,115,22,0.12); border-color: rgba(249,115,22,0.2); color: #fb923c; }
+
+  .villa-header { display: grid; grid-template-columns: 1fr 90px; gap: 6px; margin-bottom: 4px; padding: 0 2px; }
+  .villa-header span { font-size: 10px; font-weight: 600; color: var(--muted); }
+  .villa-row { display: grid; grid-template-columns: 1fr 90px; gap: 6px; margin-bottom: 6px; }
+
+  .missing-row { display: grid; grid-template-columns: 1fr 90px 70px; gap: 8px; margin-bottom: 8px; }
+  .missing-header { display: grid; grid-template-columns: 1fr 90px 70px; gap: 8px; margin-bottom: 6px; }
+  .missing-header span { font-size: 10px; font-weight: 600; color: var(--muted); padding: 0 4px; }
+
+  .add-btn { width: 100%; padding: 9px; background: transparent; border: 1px dashed var(--border); border-radius: 8px; color: var(--muted); font-family: 'Cairo', sans-serif; font-size: 12px; cursor: pointer; margin-top: 4px; transition: all 0.2s; }
+  .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .submit-btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-family: 'Cairo', sans-serif; font-size: 15px; font-weight: 900; cursor: pointer; margin-top: 8px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .submit-morning { background: var(--morning); color: #0f1117; }
+  .submit-evening { background: var(--evening); color: #fff; }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .form-panel { display: none; }
+  .form-panel.active { display: block; }
+  .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .mp-section-label { font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: grid; grid-template-columns: 1fr 80px; gap: 8px; padding: 0 2px; }
+  .mp-section-label span:last-child { text-align: center; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 20px; font-size: 13px; font-weight: 600; z-index: 999;
+    transition: transform 0.3s ease; white-space: nowrap;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: var(--green); color: var(--green); }
+  .toast.error   { border-color: var(--red);   color: var(--red); }
+  .toast.loading { border-color: var(--accent); color: var(--accent); }
+
+  body.ltr { direction: ltr; }
+  body.ltr input, body.ltr textarea, body.ltr select, body.ltr button { font-family: 'IBM Plex Mono', sans-serif; }
+</style>
+</head>
+<body>
+
+<div class="lang-bar">
+  <button class="lang-btn active" id="lang-ar" onclick="setLang('ar')">العربية 🇸🇦</button>
+  <button class="lang-btn" id="lang-en" onclick="setLang('en')">English 🇬🇧</button>
+</div>
+
+<div class="header">
+  <div class="header-badge">Precast Works · ROSHN - 75 Villas</div>
+  <h1 id="header-title">تقرير الموقع اليومي<br><span>Daily Site Report</span></h1>
+</div>
+
+<div class="tab-switcher">
+  <button class="tab-btn active-morning" id="tab-morning" onclick="switchTab('morning')">
+    <span class="tab-icon">☀️</span>
+    <span data-ar="صباح" data-en="Morning">صباح</span>
+  </button>
+  <button class="tab-btn" id="tab-evening" onclick="switchTab('evening')">
+    <span class="tab-icon">🌙</span>
+    <span data-ar="مساء" data-en="Evening">مساء</span>
+  </button>
+</div>
+
+<!-- ===== MORNING ===== -->
+<div class="form-panel active" id="panel-morning">
+
+  <div class="section">
+    <div class="section-header morning">
+      <div class="section-icon">📅</div>
+      <div><div class="section-title" data-ar="معلومات التقرير" data-en="Report Info">معلومات التقرير</div></div>
+    </div>
+    <div class="section-body">
+      <div class="date-row">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px" data-ar="التاريخ" data-en="Date">التاريخ</div>
+          <input type="date" id="m-date">
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px" data-ar="المقاول" data-en="Contractor">المقاول</div>
+          <div class="contractor-row">
+            <select id="m-contractor"></select>
+            <button class="add-contractor-btn" onclick="promptAddContractor()" data-ar="+ جديد" data-en="+ New">+ جديد</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manpower -->
+  <div class="section">
+    <div class="section-header morning">
+      <div class="section-icon">👷</div>
+      <div>
+        <div class="section-title" data-ar="العمالة" data-en="Manpower">العمالة</div>
+        <div class="section-subtitle" data-ar="اكتب المسمى والعدد" data-en="Enter role and count">اكتب المسمى والعدد</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="mp-section-label">
+        <span data-ar="المسمى الوظيفي" data-en="Role">المسمى الوظيفي</span>
+        <span data-ar="العدد" data-en="No.">العدد</span>
+      </div>
+      <div id="manpower-list">
+        <div class="mp-free-row"><input type="text" data-placeholder-ar="مثال: فورمان، تركيب..." data-placeholder-en="e.g. Foreman, Erector..." placeholder="مثال: فورمان، تركيب..." class="mp-role"><input type="number" min="0" placeholder="0" class="mp-count"></div>
+        <div class="mp-free-row"><input type="text" data-placeholder-ar="مثال: فورمان، تركيب..." data-placeholder-en="e.g. Foreman, Erector..." placeholder="مثال: فورمان، تركيب..." class="mp-role"><input type="number" min="0" placeholder="0" class="mp-count"></div>
+        <div class="mp-free-row"><input type="text" data-placeholder-ar="مثال: فورمان، تركيب..." data-placeholder-en="e.g. Foreman, Erector..." placeholder="مثال: فورمان، تركيب..." class="mp-role"><input type="number" min="0" placeholder="0" class="mp-count"></div>
+        <div class="mp-free-row"><input type="text" data-placeholder-ar="مثال: فورمان، تركيب..." data-placeholder-en="e.g. Foreman, Erector..." placeholder="مثال: فورمان، تركيب..." class="mp-role"><input type="number" min="0" placeholder="0" class="mp-count"></div>
+        <div class="mp-free-row"><input type="text" data-placeholder-ar="مثال: فورمان، تركيب..." data-placeholder-en="e.g. Foreman, Erector..." placeholder="مثال: فورمان، تركيب..." class="mp-role"><input type="number" min="0" placeholder="0" class="mp-count"></div>
+      </div>
+      <button class="add-btn" onclick="addManpowerRow()" data-ar="+ أضف صف" data-en="+ Add Row">+ أضف صف</button>
+    </div>
+  </div>
+
+  <!-- Equipment -->
+  <div class="section">
+    <div class="section-header morning">
+      <div class="section-icon">🏗</div>
+      <div><div class="section-title" data-ar="المعدات" data-en="Equipment">المعدات</div></div>
+    </div>
+    <div class="section-body">
+      <div class="mp-section-label">
+        <span data-ar="المعدة" data-en="Equipment">المعدة</span>
+        <span data-ar="العدد" data-en="No.">العدد</span>
+      </div>
+      <div id="equipment-list">
+        <div class="eq-free-row"><input type="text" class="eq-name" value="Mobile Crane"><input type="number" class="eq-count" min="0" placeholder="0"></div>
+        <div class="eq-free-row"><input type="text" class="eq-name" value="Manlift"><input type="number" class="eq-count" min="0" placeholder="0"></div>
+        <div class="eq-free-row"><input type="text" class="eq-name" data-value-ar="خلاطة جراوت" data-value-en="Grout Mixer" value="خلاطة جراوت"><input type="number" class="eq-count" min="0" placeholder="0"></div>
+      </div>
+      <button class="add-btn" onclick="addEquipmentRow()" data-ar="+ أضف معدة" data-en="+ Add Equipment">+ أضف معدة</button>
+    </div>
+  </div>
+
+  <!-- Work Plan -->
+  <div class="section">
+    <div class="section-header morning">
+      <div class="section-icon">📍</div>
+      <div>
+        <div class="section-title" data-ar="خطة العمل اليوم" data-en="Today's Work Plan">خطة العمل اليوم</div>
+        <div class="section-subtitle" data-ar="اختر أرقام الفلل لكل عملية" data-en="Select villa numbers per activity">اختر أرقام الفلل لكل عملية</div>
+      </div>
+    </div>
+    <div class="section-body" id="morning-blocks"></div>
+  </div>
+
+  <button class="submit-btn submit-morning" onclick="sendMorning()" id="btn-morning">
+    <span>📤</span> <span data-ar="إرسال تقرير الصباح" data-en="Send Morning Report">إرسال تقرير الصباح</span>
+  </button>
+</div>
+
+<!-- ===== EVENING ===== -->
+<div class="form-panel" id="panel-evening">
+
+  <div class="section">
+    <div class="section-header evening">
+      <div class="section-icon">📅</div>
+      <div><div class="section-title" data-ar="معلومات التقرير" data-en="Report Info">معلومات التقرير</div></div>
+    </div>
+    <div class="section-body">
+      <div class="date-row">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px" data-ar="التاريخ" data-en="Date">التاريخ</div>
+          <input type="date" id="e-date">
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px" data-ar="المقاول" data-en="Contractor">المقاول</div>
+          <div class="contractor-row">
+            <select id="e-contractor"></select>
+            <button class="add-contractor-btn" onclick="promptAddContractor()" data-ar="+ جديد" data-en="+ New">+ جديد</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Completed Works -->
+  <div class="section">
+    <div class="section-header evening">
+      <div class="section-icon">✅</div>
+      <div>
+        <div class="section-title" data-ar="الأعمال المنجزة" data-en="Completed Works">الأعمال المنجزة</div>
+        <div class="section-subtitle" data-ar="اختر أرقام الفلل المنجزة لكل عملية" data-en="Select completed villa numbers per activity">اختر أرقام الفلل المنجزة لكل عملية</div>
+      </div>
+    </div>
+    <div class="section-body" id="evening-blocks"></div>
+  </div>
+
+  <!-- Missing Materials -->
+  <div class="section">
+    <div class="section-header evening">
+      <div class="section-icon">🔩</div>
+      <div>
+        <div class="section-title" data-ar="نواقص المواد" data-en="Missing Materials">نواقص المواد</div>
+        <div class="section-subtitle" data-ar="ما يحتاج توريد من المصنع" data-en="Items needed from factory">ما يحتاج توريد من المصنع</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="missing-header">
+        <span data-ar="اسم القطعة" data-en="Item">اسم القطعة</span>
+        <span data-ar="رقم الفيلا" data-en="Villa No.">رقم الفيلا</span>
+        <span data-ar="الكمية" data-en="Qty">الكمية</span>
+      </div>
+      <div id="missing-list">
+        <div class="missing-row">
+          <input type="text" data-placeholder-ar="اسم القطعة..." data-placeholder-en="Item name..." placeholder="اسم القطعة..." class="missing-item">
+          <input type="text" data-placeholder-ar="رقم الفيلا" data-placeholder-en="Villa no." placeholder="رقم الفيلا" class="missing-villa">
+          <input type="text" data-placeholder-ar="الكمية" data-placeholder-en="Qty" placeholder="الكمية" class="missing-qty">
+        </div>
+      </div>
+      <button class="add-btn" onclick="addMissingRow()" data-ar="+ أضف قطعة" data-en="+ Add Item">+ أضف قطعة</button>
+    </div>
+  </div>
+
+  <!-- Issues -->
+  <div class="section">
+    <div class="section-header evening">
+      <div class="section-icon">⚠️</div>
+      <div><div class="section-title" data-ar="مشاكل وتأخيرات" data-en="Issues & Delays">مشاكل وتأخيرات</div></div>
+    </div>
+    <div class="section-body">
+      <textarea id="e-issues" data-placeholder-ar="اذكر أي مشاكل واجهتها اليوم..." data-placeholder-en="Describe any issues faced today..." placeholder="اذكر أي مشاكل واجهتها اليوم..."></textarea>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="section">
+    <div class="section-header evening">
+      <div class="section-icon">📝</div>
+      <div><div class="section-title" data-ar="ملاحظات" data-en="Notes">ملاحظات</div></div>
+    </div>
+    <div class="section-body">
+      <textarea id="e-notes" data-placeholder-ar="أي ملاحظات إضافية..." data-placeholder-en="Any additional notes..." placeholder="أي ملاحظات إضافية..."></textarea>
+    </div>
+  </div>
+
+  <button class="submit-btn submit-evening" onclick="sendEvening()" id="btn-evening">
+    <span>📤</span> <span data-ar="إرسال تقرير المساء" data-en="Send Evening Report">إرسال تقرير المساء</span>
+  </button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CONFIG — ضع رابط Apps Script هنا بعد النشر ──────────
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3_qxBRCA1FrricxG2jrOhqgiz4sGwELQedIUVuZgSIRZqQdqJZ48jREAksJhYnXh6/exec';
+
+// ─── Contractors (مخزنة في localStorage) ─────────────────
+const DEFAULT_CONTRACTORS = ['MGB', 'Thiqat', 'Black Pearls'];
+
+function getContractors() {
+  const saved = localStorage.getItem('contractors');
+  return saved ? JSON.parse(saved) : [...DEFAULT_CONTRACTORS];
+}
+function saveContractors(list) {
+  localStorage.setItem('contractors', JSON.stringify(list));
+}
+function populateContractorSelects() {
+  const list = getContractors();
+  ['m-contractor','e-contractor'].forEach(id => {
+    const sel = document.getElementById(id);
+    const prev = sel.value;
+    sel.innerHTML = '';
+    list.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      if (c === prev) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  });
+}
+function promptAddContractor() {
+  const name = prompt(currentLang === 'ar' ? 'اسم المقاول الجديد:' : 'New contractor name:');
+  if (!name || !name.trim()) return;
+  const list = getContractors();
+  if (list.includes(name.trim())) { showToast(currentLang==='ar'?'المقاول موجود مسبقاً':'Contractor already exists','error'); return; }
+  list.push(name.trim());
+  saveContractors(list);
+  populateContractorSelects();
+  showToast(currentLang==='ar'?'تمت الإضافة ✓':'Added ✓','success');
+}
+
+// ─── Data ─────────────────────────────────────────────────
+const BLOCKS = [
+  { num:'104', range:'1253–1269', villas: Array.from({length:17},(_,i)=>1253+i) },
+  { num:'105', range:'1270–1298', villas: Array.from({length:29},(_,i)=>1270+i) },
+  { num:'106', range:'1299–1327', villas: Array.from({length:29},(_,i)=>1299+i) },
+];
+const WORKS = [
+  { key:'erection',  tagClass:'tag-erection',  ar:'تركيب',             en:'Erection' },
+  { key:'alignment', tagClass:'tag-alignment', ar:'محاذاة',             en:'Alignment' },
+  { key:'grouting',  tagClass:'tag-grouting',  ar:'جراوت',             en:'Grouting' },
+  { key:'sealant',   tagClass:'tag-sealant',   ar:'سيلانت',            en:'Sealant' },
+  { key:'repairing', tagClass:'tag-repairing', ar:'ترميم / تجهيز سطح', en:'Repairing & Surface Prep' },
+  { key:'mep',       tagClass:'tag-mep',       ar:'MEP / تصبيب',       en:'MEP Fixation & Topping' },
+];
+const FLOORS = ['GF Panels','FF HCS','FF Panels','SF HCS','SF Panels','UR HCS'];
+let currentLang = 'ar';
+
+// ─── Language ─────────────────────────────────────────────
+function setLang(lang) {
+  currentLang = lang;
+  document.body.dir = lang==='ar'?'rtl':'ltr';
+  document.body.classList.toggle('ltr', lang==='en');
+  document.getElementById('lang-ar').classList.toggle('active', lang==='ar');
+  document.getElementById('lang-en').classList.toggle('active', lang==='en');
+  document.querySelectorAll('[data-ar][data-en]').forEach(el => {
+    if (!['INPUT','TEXTAREA','SELECT'].includes(el.tagName)) el.textContent = el.dataset[lang];
+  });
+  document.querySelectorAll('[data-placeholder-ar]').forEach(el => {
+    el.placeholder = lang==='ar' ? el.dataset.placeholderAr : el.dataset.placeholderEn;
+  });
+  document.querySelectorAll('[data-value-ar]').forEach(el => {
+    if (!el.dataset.userEdited) el.value = lang==='ar' ? el.dataset.valueAr : el.dataset.valueEn;
+  });
+  buildBlocks('morning-blocks','m');
+  buildBlocks('evening-blocks','e');
+}
+
+// ─── Build Blocks ─────────────────────────────────────────
+function buildBlocks(containerId, prefix) {
+  const container = document.getElementById(containerId);
+  const saved = {};
+  container.querySelectorAll('.villa-entries').forEach(ve => {
+    const key = ve.dataset.block+'|'+ve.dataset.work;
+    saved[key] = [];
+    ve.querySelectorAll('.villa-row').forEach(row => {
+      saved[key].push({
+        villa: row.querySelector('.vl-villa').value,
+        floor: row.querySelector('.vl-floor').value
+      });
+    });
+  });
+  container.innerHTML = '';
+  BLOCKS.forEach(block => {
+    const card = document.createElement('div');
+    card.className = 'block-card';
+    card.innerHTML = `
+      <div class="block-toggle" onclick="toggleBlock(this)">
+        <div class="block-toggle-left">
+          <div class="block-name">Block ${block.num}</div>
+          <div class="block-range">${block.range}</div>
+        </div>
+        <div class="block-chevron">▼</div>
+      </div>
+      <div class="block-body"></div>
+    `;
+    const body = card.querySelector('.block-body');
+    WORKS.forEach(work => {
+      const label = currentLang==='ar' ? work.ar : work.en;
+      const saveKey = `${prefix}-${block.num}|${work.key}`;
+      const prevEntries = saved[saveKey] || [{villa:'',floor:''}];
+      const workDiv = document.createElement('div');
+      workDiv.className = 'work-row';
+      const tag = document.createElement('div');
+      tag.className = `work-tag ${work.tagClass}`;
+      tag.textContent = label;
+      const right = document.createElement('div');
+      right.innerHTML = `<div class="villa-header"><span>${currentLang==='ar'?'رقم الفيلا':'Villa No.'}</span><span>${currentLang==='ar'?'الدور':'Floor'}</span></div>`;
+      const entriesDiv = document.createElement('div');
+      entriesDiv.className = 'villa-entries';
+      entriesDiv.dataset.block = `${prefix}-${block.num}`;
+      entriesDiv.dataset.work = work.key;
+      prevEntries.forEach(e => entriesDiv.appendChild(makeVillaRow(block.villas, e.villa, e.floor)));
+      const addBtn = document.createElement('button');
+      addBtn.className = 'add-btn';
+      addBtn.style.marginTop = '4px';
+      addBtn.textContent = currentLang==='ar' ? '+ فيلا' : '+ Villa';
+      addBtn.onclick = () => entriesDiv.appendChild(makeVillaRow(block.villas,'',''));
+      right.appendChild(entriesDiv);
+      right.appendChild(addBtn);
+      workDiv.appendChild(tag);
+      workDiv.appendChild(right);
+      body.appendChild(workDiv);
+    });
+    container.appendChild(card);
+  });
+}
+
+function makeVillaRow(villas, selectedVilla, selectedFloor) {
+  const row = document.createElement('div');
+  row.className = 'villa-row';
+  const sel = document.createElement('select');
+  sel.className = 'vl-villa';
+  const empty = document.createElement('option');
+  empty.value = ''; empty.textContent = currentLang==='ar'?'— اختر فيلا —':'— Select Villa —';
+  sel.appendChild(empty);
+  villas.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = `VL-${v}`;
+    if (String(v)===String(selectedVilla)||`VL-${v}`===selectedVilla) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  const floorSel = document.createElement('select');
+  floorSel.className = 'vl-floor';
+  const ef = document.createElement('option');
+  ef.value = ''; ef.textContent = currentLang==='ar'?'الدور':'Floor';
+  floorSel.appendChild(ef);
+  FLOORS.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f; opt.textContent = f;
+    if (f===selectedFloor) opt.selected = true;
+    floorSel.appendChild(opt);
+  });
+  row.appendChild(sel);
+  row.appendChild(floorSel);
+  return row;
+}
+
+function toggleBlock(el) { el.closest('.block-card').classList.toggle('open'); }
+
+function switchTab(tab) {
+  ['panel-morning','panel-evening'].forEach(p => document.getElementById(p).classList.remove('active'));
+  ['tab-morning','tab-evening'].forEach(b => document.getElementById(b).className='tab-btn');
+  if (tab==='morning') {
+    document.getElementById('panel-morning').classList.add('active');
+    document.getElementById('tab-morning').classList.add('active-morning');
+  } else {
+    document.getElementById('panel-evening').classList.add('active');
+    document.getElementById('tab-evening').classList.add('active-evening');
+  }
+}
+
+function addManpowerRow() {
+  const list = document.getElementById('manpower-list');
+  const row = document.createElement('div');
+  row.className = 'mp-free-row';
+  const phAr='مثال: فورمان، تركيب...', phEn='e.g. Foreman, Erector...';
+  row.innerHTML = `<input type="text" data-placeholder-ar="${phAr}" data-placeholder-en="${phEn}" placeholder="${currentLang==='ar'?phAr:phEn}" class="mp-role"><input type="number" min="0" placeholder="0" class="mp-count">`;
+  list.appendChild(row);
+}
+function addEquipmentRow() {
+  const list = document.getElementById('equipment-list');
+  const row = document.createElement('div');
+  row.className = 'eq-free-row';
+  const phAr='اسم المعدة...', phEn='Equipment name...';
+  row.innerHTML = `<input type="text" class="eq-name" data-placeholder-ar="${phAr}" data-placeholder-en="${phEn}" placeholder="${currentLang==='ar'?phAr:phEn}"><input type="number" class="eq-count" min="0" placeholder="0">`;
+  list.appendChild(row);
+}
+function addMissingRow() {
+  const list = document.getElementById('missing-list');
+  const row = document.createElement('div');
+  row.className = 'missing-row';
+  const l = currentLang;
+  row.innerHTML = `
+    <input type="text" data-placeholder-ar="اسم القطعة..." data-placeholder-en="Item name..." placeholder="${l==='ar'?'اسم القطعة...':'Item name...'}" class="missing-item">
+    <input type="text" data-placeholder-ar="رقم الفيلا" data-placeholder-en="Villa no." placeholder="${l==='ar'?'رقم الفيلا':'Villa no.'}" class="missing-villa">
+    <input type="text" data-placeholder-ar="الكمية" data-placeholder-en="Qty" placeholder="${l==='ar'?'الكمية':'Qty'}" class="missing-qty">
+  `;
+  list.appendChild(row);
+}
+
+// ─── Collect data ──────────────────────────────────────────
+function getVillaEntries(prefix, block, work) {
+  const container = document.querySelector(`.villa-entries[data-block="${prefix}-${block}"][data-work="${work}"]`);
+  if (!container) return [];
+  const entries = [];
+  container.querySelectorAll('.villa-row').forEach(row => {
+    const v = row.querySelector('.vl-villa').value.trim();
+    const f = row.querySelector('.vl-floor').value.trim();
+    if (v) entries.push(`VL-${v}` + (f?` ${f}`:''));
+  });
+  return entries;
+}
+
+// Returns array of row objects for Sheets: {block, work, villas}
+function collectWorkRows(prefix) {
+  const rows = [];
+  BLOCKS.forEach(block => {
+    WORKS.forEach(work => {
+      const entries = getVillaEntries(prefix, block.num, work.key);
+      if (entries.length > 0) {
+        rows.push({
+          block: `Block ${block.num}`,
+          work_ar: work.ar,
+          work_en: work.en,
+          villas: entries.join(', ')
+        });
+      }
+    });
+  });
+  return rows;
+}
+
+function collectManpower() {
+  const roles = document.querySelectorAll('.mp-role');
+  const counts = document.querySelectorAll('.mp-count');
+  let lines = [], total = 0;
+  roles.forEach((r,i) => {
+    const role = r.value.trim();
+    const count = counts[i] ? parseInt(counts[i].value)||0 : 0;
+    if (role && count>0) { lines.push(`${role}: ${count}`); total += count; }
+  });
+  return { text: lines.join(' | '), total };
+}
+
+function collectEquipment() {
+  const names = document.querySelectorAll('.eq-name');
+  const counts = document.querySelectorAll('.eq-count');
+  let lines = [];
+  names.forEach((n,i) => {
+    const name = n.value.trim();
+    const count = counts[i] ? parseInt(counts[i].value)||0 : 0;
+    if (name) lines.push(`${name}: ${count}`);
+  });
+  return lines.join(' | ');
+}
+
+function collectMissing() {
+  const items = document.querySelectorAll('.missing-item');
+  const villas = document.querySelectorAll('.missing-villa');
+  const qtys = document.querySelectorAll('.missing-qty');
+  let lines = [];
+  items.forEach((item,i) => {
+    const name = item.value.trim();
+    const villa = villas[i]?villas[i].value.trim():'';
+    const qty = qtys[i]?qtys[i].value.trim():'';
+    if (name) lines.push(`${name}${villa?' (VL-'+villa+')':''}${qty?' x'+qty:''}`);
+  });
+  return lines.join(' | ');
+}
+
+function val(id) { const el=document.getElementById(id); return el?el.value.trim():''; }
+
+// ─── Toast ─────────────────────────────────────────────────
+function showToast(msg, type='loading') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  if (type !== 'loading') setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ─── Send to Google Sheets + WhatsApp ─────────────────────
+async function sendToSheets(payload) {
+  if (APPS_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycby3_qxBRCA1FrricxG2jrOhqgiz4sGwELQedIUVuZgSIRZqQdqJZ48jREAksJhYnXh6/exec') return true; // skip if not configured
+  const resp = await fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+  const result = await resp.json();
+  return result.status === 'ok';
+}
+
+// ─── Build WhatsApp message ────────────────────────────────
+function buildWhatsAppMsg(type, date, contractor, workRows, extraData) {
+  const L = currentLang === 'ar';
+  let msg = L ? `--- تقرير الصباح ---\n` : `--- Morning Report ---\n`;
+  if (type === 'evening') msg = L ? `--- تقرير نهاية اليوم ---\n` : `--- End of Day Report ---\n`;
+  msg += `${L?'التاريخ':'Date'}: ${date}\n`;
+  msg += `${L?'المقاول':'Contractor'}: ${contractor}\n`;
+
+  if (type === 'morning') {
+    const mp = extraData.manpower;
+    const eq = extraData.equipment;
+    msg += `\n${L?'--- العمالة ---':'--- Manpower ---'}\n`;
+    msg += mp.text ? `  ${mp.text}\n  ${L?'الإجمالي':'Total'}: ${mp.total}\n` : `  -\n`;
+    msg += `\n${L?'--- المعدات ---':'--- Equipment ---'}\n`;
+    msg += eq ? `  ${eq}\n` : `  -\n`;
+    msg += `\n${L?'--- خطة العمل ---':"--- Today's Work Plan ---"}\n`;
+  } else {
+    msg += `\n${L?'--- الأعمال المنجزة ---':'--- Completed Works ---'}\n`;
+  }
+
+  let lastBlock = '';
+  workRows.forEach(r => {
+    if (r.block !== lastBlock) { msg += `\n${r.block}\n`; lastBlock = r.block; }
+    const label = L ? r.work_ar : r.work_en;
+    msg += `  ${label}: ${r.villas}\n`;
+  });
+  if (workRows.length === 0) msg += `  -\n`;
+
+  if (type === 'evening') {
+    const missing = extraData.missing;
+    const issues = extraData.issues;
+    const notes = extraData.notes;
+    if (missing) { msg += `\n${L?'--- نواقص المواد ---':'--- Missing Materials ---'}\n  ${missing}\n`; }
+    if (issues)  { msg += `\n${L?'--- مشاكل وتأخيرات ---':'--- Issues & Delays ---'}\n${issues}\n`; }
+    if (notes)   { msg += `\n${L?'--- ملاحظات ---':'--- Notes ---'}\n${notes}\n`; }
+  }
+  return msg;
+}
+
+// ─── Send Morning ──────────────────────────────────────────
+async function sendMorning() {
+  const date = val('m-date');
+  const contractor = val('m-contractor');
+  if (!contractor) { showToast(currentLang==='ar'?'اختر المقاول أولاً':'Select contractor first','error'); return; }
+
+  const mp = collectManpower();
+  const eq = collectEquipment();
+  const workRows = collectWorkRows('m');
+
+  const payload = {
+    type: 'morning',
+    date, contractor,
+    manpower: mp.text,
+    manpower_total: mp.total,
+    equipment: eq,
+    works: workRows
+  };
+
+  const btn = document.getElementById('btn-morning');
+  btn.disabled = true;
+  showToast(currentLang==='ar'?'جاري الحفظ في Sheets...':'Saving to Sheets...','loading');
+
+  try {
+    await sendToSheets(payload);
+    showToast(currentLang==='ar'?'تم الحفظ في Google Sheets ✓':'Saved to Google Sheets ✓','success');
+  } catch(e) {
+    showToast(currentLang==='ar'?'تعذر الحفظ في Sheets، تم الإرسال بالواتساب فقط':'Sheets save failed, WhatsApp only','error');
+  }
+
+  const msg = buildWhatsAppMsg('morning', date, contractor, workRows, {manpower:mp, equipment:eq});
+  setTimeout(() => {
+    window.open(`https://wa.me/966542220225?text=${encodeURIComponent(msg)}`, '_blank');
+    btn.disabled = false;
+  }, 800);
+}
+
+// ─── Send Evening ──────────────────────────────────────────
+async function sendEvening() {
+  const date = val('e-date');
+  const contractor = val('e-contractor');
+  if (!contractor) { showToast(currentLang==='ar'?'اختر المقاول أولاً':'Select contractor first','error'); return; }
+
+  const workRows = collectWorkRows('e');
+  const missing = collectMissing();
+  const issues = val('e-issues');
+  const notes  = val('e-notes');
+
+  const payload = {
+    type: 'evening',
+    date, contractor,
+    works: workRows,
+    missing, issues, notes
+  };
+
+  const btn = document.getElementById('btn-evening');
+  btn.disabled = true;
+  showToast(currentLang==='ar'?'جاري الحفظ في Sheets...':'Saving to Sheets...','loading');
+
+  try {
+    await sendToSheets(payload);
+    showToast(currentLang==='ar'?'تم الحفظ في Google Sheets ✓':'Saved to Google Sheets ✓','success');
+  } catch(e) {
+    showToast(currentLang==='ar'?'تعذر الحفظ في Sheets، تم الإرسال بالواتساب فقط':'Sheets save failed, WhatsApp only','error');
+  }
+
+  const msg = buildWhatsAppMsg('evening', date, contractor, workRows, {missing, issues, notes});
+  setTimeout(() => {
+    window.open(`https://wa.me/966542220225?text=${encodeURIComponent(msg)}`, '_blank');
+    btn.disabled = false;
+  }, 800);
+}
+
+// ─── Init ──────────────────────────────────────────────────
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('m-date').value = today;
+document.getElementById('e-date').value = today;
+populateContractorSelects();
+buildBlocks('morning-blocks','m');
+buildBlocks('evening-blocks','e');
+</script>
+</body>
+</html>
