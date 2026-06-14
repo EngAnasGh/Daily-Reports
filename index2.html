@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -79,9 +79,17 @@
   .tag-alignment { background: rgba(245,166,35,0.12); border-color: rgba(245,166,35,0.2); color: #fbbf24; }
   .tag-grouting  { background: rgba(34,197,94,0.12);  border-color: rgba(34,197,94,0.2);  color: #4ade80; }
   .tag-sealant   { background: rgba(139,92,246,0.12); border-color: rgba(139,92,246,0.2); color: #a78bfa; }
-  .tag-repairing { background: rgba(20,184,166,0.12); border-color: rgba(20,184,166,0.2); color: #2dd4bf; }
-  .tag-mep       { background: rgba(249,115,22,0.12); border-color: rgba(249,115,22,0.2); color: #fb923c; }
-  .tag-offloading{ background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.2); color: #818cf8; }
+  .tag-repairing  { background: rgba(20,184,166,0.12);  border-color: rgba(20,184,166,0.2);  color: #2dd4bf; }
+  .tag-mep        { background: rgba(249,115,22,0.12);  border-color: rgba(249,115,22,0.2);  color: #fb923c; }
+  .tag-screed     { background: rgba(234,179,8,0.12);   border-color: rgba(234,179,8,0.2);   color: #facc15; }
+  .tag-foundation { background: rgba(168,85,247,0.12);  border-color: rgba(168,85,247,0.2);  color: #c084fc; }
+  .tag-accessories{ background: rgba(236,72,153,0.12);  border-color: rgba(236,72,153,0.2);  color: #f472b6; }
+  .tag-offloading { background: rgba(99,102,241,0.12);  border-color: rgba(99,102,241,0.2);  color: #818cf8; }
+  .acc-header { display: grid; grid-template-columns: 1fr 90px 70px; gap: 6px; margin-bottom: 4px; padding: 0 2px; }
+  .acc-header span { font-size: 10px; font-weight: 600; color: var(--muted); }
+  .acc-piece-label { font-size: 10px; font-weight: 700; color: var(--muted); margin: 8px 0 4px; padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid var(--border); }
+  .acc-row { display: grid; grid-template-columns: 1fr 90px 70px; gap: 6px; margin-bottom: 6px; }
+  .acc-row input[type="number"] { text-align: center; font-weight: 700; }
 
   .villa-header { display: grid; grid-template-columns: 1fr 90px; gap: 6px; margin-bottom: 4px; padding: 0 2px; }
   .villa-header span { font-size: 10px; font-weight: 600; color: var(--muted); }
@@ -126,8 +134,8 @@
 <body>
 
 <div class="lang-bar">
-  <button class="lang-btn active" id="lang-ar" onclick="setLang('ar')">العربية 🇸🇦</button>
-  <button class="lang-btn" id="lang-en" onclick="setLang('en')">English 🇬🇧</button>
+  <button class="lang-btn" id="lang-ar" onclick="setLang('ar')">العربية 🇸🇦</button>
+  <button class="lang-btn active" id="lang-en" onclick="setLang('en')">English 🇬🇧</button>
 </div>
 
 <div class="header">
@@ -372,16 +380,19 @@ const BLOCKS = [
   { num:'106', range:'1299–1327', villas: Array.from({length:29},(_,i)=>1299+i) },
 ];
 const WORKS = [
-  { key:'erection',  tagClass:'tag-erection',  ar:'تركيب',             en:'Erection' },
-  { key:'alignment', tagClass:'tag-alignment', ar:'محاذاة',             en:'Alignment' },
-  { key:'grouting',  tagClass:'tag-grouting',  ar:'جراوت',             en:'Grouting' },
-  { key:'sealant',   tagClass:'tag-sealant',   ar:'سيلانت',            en:'Sealant' },
-  { key:'repairing', tagClass:'tag-repairing', ar:'ترميم / تجهيز سطح', en:'Repairing & Surface Prep' },
-  { key:'mep',       tagClass:'tag-mep',       ar:'MEP / تصبيب',       en:'MEP Fixation & Topping' },
-  { key:'offloading',tagClass:'tag-offloading',ar:'تشوين',             en:'Offloading' },
+  { key:'erection',    tagClass:'tag-erection',    ar:'تركيب',             en:'Erection' },
+  { key:'alignment',   tagClass:'tag-alignment',   ar:'محاذاة',             en:'Alignment' },
+  { key:'grouting',    tagClass:'tag-grouting',    ar:'جراوت',             en:'Grouting' },
+  { key:'sealant',     tagClass:'tag-sealant',     ar:'سيلانت',            en:'Sealant' },
+  { key:'repairing',   tagClass:'tag-repairing',   ar:'ترميم / تجهيز سطح', en:'Repairing & Surface Prep' },
+  { key:'mep',         tagClass:'tag-mep',         ar:'أعمال MEP',         en:'MEP Work' },
+  { key:'screed',      tagClass:'tag-screed',      ar:'تصبيب (Screed)',    en:'Screed' },
+  { key:'offloading',  tagClass:'tag-offloading',  ar:'تشوين',             en:'Offloading' },
+  { key:'foundation',  tagClass:'tag-foundation',  ar:'أساسات',            en:'Foundation' },
+  { key:'accessories', tagClass:'tag-accessories', ar:'إكسسوارات',         en:'Accessories', isAccessories: true },
 ];
 const FLOORS = ['GF Panels','FF HCS','FF Panels','SF HCS','SF Panels','UR HCS'];
-let currentLang = 'ar';
+let currentLang = 'en';
 
 // ─── Language ─────────────────────────────────────────────
 function setLang(lang) {
@@ -410,10 +421,14 @@ function buildBlocks(containerId, prefix) {
   container.querySelectorAll('.villa-entries').forEach(ve => {
     const key = ve.dataset.block+'|'+ve.dataset.work;
     saved[key] = [];
-    ve.querySelectorAll('.villa-row').forEach(row => {
+    ve.querySelectorAll('.villa-row, .acc-row').forEach(row => {
+      const villaEl = row.querySelector('.vl-villa');
+      const floorEl = row.querySelector('.vl-floor');
+      const qtyEl   = row.querySelector('.vl-qty');
       saved[key].push({
-        villa: row.querySelector('.vl-villa').value,
-        floor: row.querySelector('.vl-floor').value
+        villa: villaEl ? villaEl.value : '',
+        floor: floorEl ? floorEl.value : '',
+        qty:   qtyEl   ? qtyEl.value   : ''
       });
     });
   });
@@ -434,29 +449,69 @@ function buildBlocks(containerId, prefix) {
     const body = card.querySelector('.block-body');
     WORKS.forEach(work => {
       const label = currentLang==='ar' ? work.ar : work.en;
-      const saveKey = `${prefix}-${block.num}|${work.key}`;
-      const prevEntries = saved[saveKey] || [{villa:'',floor:''}];
       const workDiv = document.createElement('div');
       workDiv.className = 'work-row';
       const tag = document.createElement('div');
       tag.className = `work-tag ${work.tagClass}`;
       tag.textContent = label;
-      const right = document.createElement('div');
-      right.innerHTML = `<div class="villa-header"><span>${currentLang==='ar'?'رقم الفيلا':'Villa No.'}</span><span>${currentLang==='ar'?'الدور':'Floor'}</span></div>`;
-      const entriesDiv = document.createElement('div');
-      entriesDiv.className = 'villa-entries';
-      entriesDiv.dataset.block = `${prefix}-${block.num}`;
-      entriesDiv.dataset.work = work.key;
-      prevEntries.forEach(e => entriesDiv.appendChild(makeVillaRow(block.villas, e.villa, e.floor)));
-      const addBtn = document.createElement('button');
-      addBtn.className = 'add-btn';
-      addBtn.style.marginTop = '4px';
-      addBtn.textContent = currentLang==='ar' ? '+ فيلا' : '+ Villa';
-      addBtn.onclick = () => entriesDiv.appendChild(makeVillaRow(block.villas,'',''));
-      right.appendChild(entriesDiv);
-      right.appendChild(addBtn);
       workDiv.appendChild(tag);
-      workDiv.appendChild(right);
+
+      if (work.isAccessories) {
+        const right = document.createElement('div');
+        const accPieces = ['Shaft Slab & Cover','Scupper','Steel Angle','Lift Slab'];
+        accPieces.forEach(piece => {
+          const pieceKey = piece.replace(/[^a-z]/gi,'').toLowerCase();
+          const saveKey = `${prefix}-${block.num}|${work.key}_${pieceKey}`;
+          const prevEntries = saved[saveKey] || [{villa:'', floor:'', qty:''}];
+
+          const pieceLabel = document.createElement('div');
+          pieceLabel.className = 'acc-piece-label';
+          pieceLabel.textContent = piece;
+          right.appendChild(pieceLabel);
+
+          const header = document.createElement('div');
+          header.className = 'acc-header';
+          header.innerHTML = `<span>${currentLang==='ar'?'رقم الفيلا':'Villa No.'}</span><span>${currentLang==='ar'?'الدور':'Floor'}</span><span>${currentLang==='ar'?'الكمية':'Qty'}</span>`;
+          right.appendChild(header);
+
+          const entriesDiv = document.createElement('div');
+          entriesDiv.className = 'villa-entries';
+          entriesDiv.dataset.block = `${prefix}-${block.num}`;
+          entriesDiv.dataset.work = `${work.key}_${pieceKey}`;
+
+          prevEntries.forEach(e => entriesDiv.appendChild(makeAccRow(block.villas, e.villa||'', e.floor||'', e.qty||'')));
+
+          const addBtn = document.createElement('button');
+          addBtn.className = 'add-btn';
+          addBtn.style.marginTop = '2px';
+          addBtn.textContent = currentLang==='ar' ? '+ فيلا' : '+ Villa';
+          addBtn.onclick = () => entriesDiv.appendChild(makeAccRow(block.villas,'','',''));
+
+          right.appendChild(entriesDiv);
+          right.appendChild(addBtn);
+        });
+        workDiv.appendChild(right);
+      } else {
+        // Standard villa + floor section
+        const saveKey = `${prefix}-${block.num}|${work.key}`;
+        const prevEntries = saved[saveKey] || [{villa:'',floor:''}];
+        const right = document.createElement('div');
+        right.innerHTML = `<div class="villa-header"><span>${currentLang==='ar'?'رقم الفيلا':'Villa No.'}</span><span>${currentLang==='ar'?'الدور':'Floor'}</span></div>`;
+        const entriesDiv = document.createElement('div');
+        entriesDiv.className = 'villa-entries';
+        entriesDiv.dataset.block = `${prefix}-${block.num}`;
+        entriesDiv.dataset.work = work.key;
+        prevEntries.forEach(e => entriesDiv.appendChild(makeVillaRow(block.villas, e.villa, e.floor)));
+        const addBtn = document.createElement('button');
+        addBtn.className = 'add-btn';
+        addBtn.style.marginTop = '4px';
+        addBtn.textContent = currentLang==='ar' ? '+ فيلا' : '+ Villa';
+        addBtn.onclick = () => entriesDiv.appendChild(makeVillaRow(block.villas,'',''));
+        right.appendChild(entriesDiv);
+        right.appendChild(addBtn);
+        workDiv.appendChild(right);
+      }
+
       body.appendChild(workDiv);
     });
     container.appendChild(card);
@@ -492,6 +547,45 @@ function makeVillaRow(villas, selectedVilla, selectedFloor) {
   row.appendChild(floorSel);
   return row;
 }
+
+function makeAccRow(villas, selectedVilla, selectedFloor, selectedQty) {
+  const row = document.createElement('div');
+  row.className = 'acc-row';
+  const sel = document.createElement('select');
+  sel.className = 'vl-villa';
+  const empty = document.createElement('option');
+  empty.value = ''; empty.textContent = currentLang==='ar'?'— اختر فيلا —':'— Select Villa —';
+  sel.appendChild(empty);
+  villas.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = `VL-${v}`;
+    if (String(v)===String(selectedVilla)||`VL-${v}`===selectedVilla) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  const floorSel = document.createElement('select');
+  floorSel.className = 'vl-floor';
+  const ef = document.createElement('option');
+  ef.value = ''; ef.textContent = currentLang==='ar'?'الدور':'Floor';
+  floorSel.appendChild(ef);
+  FLOORS.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f; opt.textContent = f;
+    if (f===selectedFloor) opt.selected = true;
+    floorSel.appendChild(opt);
+  });
+  const qtyInput = document.createElement('input');
+  qtyInput.type = 'number';
+  qtyInput.className = 'vl-qty';
+  qtyInput.min = '0';
+  qtyInput.placeholder = currentLang==='ar'?'كمية':'Qty';
+  qtyInput.value = selectedQty || '';
+  row.appendChild(sel);
+  row.appendChild(floorSel);
+  row.appendChild(qtyInput);
+  return row;
+}
+
+
 
 function toggleBlock(el) { el.closest('.block-card').classList.toggle('open'); }
 
@@ -552,16 +646,41 @@ function getVillaEntries(prefix, block, work) {
 // Returns array of row objects for Sheets: {block, work, villas}
 function collectWorkRows(prefix) {
   const rows = [];
+  const accPieces = ['Shaft Slab & Cover','Scupper','Steel Angle','Lift Slab'];
   BLOCKS.forEach(block => {
     WORKS.forEach(work => {
-      const entries = getVillaEntries(prefix, block.num, work.key);
-      if (entries.length > 0) {
-        rows.push({
-          block: `Block ${block.num}`,
-          work_ar: work.ar,
-          work_en: work.en,
-          villas: entries.join(', ')
+      if (work.isAccessories) {
+        // collect each piece separately
+        accPieces.forEach(piece => {
+          const pieceKey = piece.replace(/[^a-z]/gi,'').toLowerCase();
+          const container = document.querySelector(`.villa-entries[data-block="${prefix}-${block.num}"][data-work="accessories_${pieceKey}"]`);
+          if (!container) return;
+          const entries = [];
+          container.querySelectorAll('.acc-row').forEach(row => {
+            const v = row.querySelector('.vl-villa').value.trim();
+            const f = row.querySelector('.vl-floor').value.trim();
+            const q = row.querySelector('.vl-qty').value.trim();
+            if (v) entries.push(`VL-${v}${f?' '+f:''} x${q||'0'}`);
+          });
+          if (entries.length > 0) {
+            rows.push({
+              block: `Block ${block.num}`,
+              work_ar: `إكسسوارات - ${piece}`,
+              work_en: `Accessories - ${piece}`,
+              villas: entries.join(', ')
+            });
+          }
         });
+      } else {
+        const entries = getVillaEntries(prefix, block.num, work.key);
+        if (entries.length > 0) {
+          rows.push({
+            block: `Block ${block.num}`,
+            work_ar: work.ar,
+            work_en: work.en,
+            villas: entries.join(', ')
+          });
+        }
       }
     });
   });
@@ -618,13 +737,14 @@ function showToast(msg, type='loading') {
 
 // ─── Send to Google Sheets + WhatsApp ─────────────────────
 async function sendToSheets(payload) {
-  if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return true; // skip if not configured
-  const resp = await fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify(payload)
+  if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return true;
+  return new Promise((resolve) => {
+    const params = new URLSearchParams({ data: JSON.stringify(payload) });
+    const img = new Image();
+    img.onload = img.onerror = () => resolve(true);
+    img.src = APPS_SCRIPT_URL + '?' + params.toString();
+    setTimeout(() => resolve(true), 5000);
   });
-  const result = await resp.json();
-  return result.status === 'ok';
 }
 
 // ─── Build WhatsApp message ────────────────────────────────
@@ -687,20 +807,18 @@ async function sendMorning() {
 
   const btn = document.getElementById('btn-morning');
   btn.disabled = true;
-  showToast(currentLang==='ar'?'جاري الحفظ في Sheets...':'Saving to Sheets...','loading');
 
+  const msg = buildWhatsAppMsg('morning', date, contractor, workRows, {manpower:mp, equipment:eq});
+  window.open(`https://wa.me/966542220225?text=${encodeURIComponent(msg)}`, '_blank');
+
+  showToast(currentLang==='ar'?'جاري الحفظ في Sheets...':'Saving to Sheets...','loading');
   try {
     await sendToSheets(payload);
     showToast(currentLang==='ar'?'تم الحفظ في Google Sheets ✓':'Saved to Google Sheets ✓','success');
   } catch(e) {
-    showToast(currentLang==='ar'?'تعذر الحفظ في Sheets، تم الإرسال بالواتساب فقط':'Sheets save failed, WhatsApp only','error');
+    showToast(currentLang==='ar'?'تعذر الحفظ في Sheets':'Sheets save failed','error');
   }
-
-  const msg = buildWhatsAppMsg('morning', date, contractor, workRows, {manpower:mp, equipment:eq});
-  setTimeout(() => {
-    window.open(`https://wa.me/966542220225?text=${encodeURIComponent(msg)}`, '_blank');
-    btn.disabled = false;
-  }, 800);
+  btn.disabled = false;
 }
 
 // ─── Send Evening ──────────────────────────────────────────
@@ -723,20 +841,18 @@ async function sendEvening() {
 
   const btn = document.getElementById('btn-evening');
   btn.disabled = true;
-  showToast(currentLang==='ar'?'جاري الحفظ في Sheets...':'Saving to Sheets...','loading');
 
+  const msg = buildWhatsAppMsg('evening', date, contractor, workRows, {missing, issues, notes});
+  window.open(`https://wa.me/966542220225?text=${encodeURIComponent(msg)}`, '_blank');
+
+  showToast(currentLang==='ar'?'جاري الحفظ في Sheets...':'Saving to Sheets...','loading');
   try {
     await sendToSheets(payload);
     showToast(currentLang==='ar'?'تم الحفظ في Google Sheets ✓':'Saved to Google Sheets ✓','success');
   } catch(e) {
-    showToast(currentLang==='ar'?'تعذر الحفظ في Sheets، تم الإرسال بالواتساب فقط':'Sheets save failed, WhatsApp only','error');
+    showToast(currentLang==='ar'?'تعذر الحفظ في Sheets':'Sheets save failed','error');
   }
-
-  const msg = buildWhatsAppMsg('evening', date, contractor, workRows, {missing, issues, notes});
-  setTimeout(() => {
-    window.open(`https://wa.me/966542220225?text=${encodeURIComponent(msg)}`, '_blank');
-    btn.disabled = false;
-  }, 800);
+  btn.disabled = false;
 }
 
 // ─── Init ──────────────────────────────────────────────────
@@ -744,8 +860,7 @@ const today = new Date().toISOString().split('T')[0];
 document.getElementById('m-date').value = today;
 document.getElementById('e-date').value = today;
 populateContractorSelects();
-buildBlocks('morning-blocks','m');
-buildBlocks('evening-blocks','e');
+setLang('en');
 </script>
 </body>
 </html>
