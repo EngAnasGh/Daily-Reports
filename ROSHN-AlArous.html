@@ -973,7 +973,10 @@ function addMissingRow(listId) {
 
 // ─── Collect data ──────────────────────────────────────────
 function collectManpower(prefix) {
-  const panel = document.getElementById(`${prefix}-manpower-list`);
+  // prefix = p1m, p1e, p2m, p2e
+  const pkg = prefix.substring(0,2); // p1 or p2
+  const time = prefix.substring(2);  // m or e
+  const panel = document.getElementById(`${pkg}${time}-manpower-list`);
   if (!panel) return {text:'', total:0};
   const roles = panel.querySelectorAll('.mp-role');
   const counts = panel.querySelectorAll('.mp-count');
@@ -985,7 +988,9 @@ function collectManpower(prefix) {
   return {text:lines.join(' | '), total};
 }
 function collectEquipment(prefix) {
-  const panel = document.getElementById(`${prefix}-equipment-list`);
+  const pkg = prefix.substring(0,2);
+  const time = prefix.substring(2);
+  const panel = document.getElementById(`${pkg}${time}-equipment-list`);
   if (!panel) return '';
   const names=panel.querySelectorAll('.eq-name'), counts=panel.querySelectorAll('.eq-count');
   let lines=[];
