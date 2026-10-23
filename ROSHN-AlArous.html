@@ -972,11 +972,8 @@ function addMissingRow(listId) {
 }
 
 // ─── Collect data ──────────────────────────────────────────
-function collectManpower(prefix) {
-  // prefix = p1m, p1e, p2m, p2e
-  const pkg = prefix.substring(0,2); // p1 or p2
-  const time = prefix.substring(2);  // m or e
-  const panel = document.getElementById(`${pkg}${time}-manpower-list`);
+function collectManpower(pf) {
+  const panel = document.getElementById(`${pf}-manpower-list`);
   if (!panel) return {text:'', total:0};
   const roles = panel.querySelectorAll('.mp-role');
   const counts = panel.querySelectorAll('.mp-count');
@@ -987,10 +984,8 @@ function collectManpower(prefix) {
   });
   return {text:lines.join(' | '), total};
 }
-function collectEquipment(prefix) {
-  const pkg = prefix.substring(0,2);
-  const time = prefix.substring(2);
-  const panel = document.getElementById(`${pkg}${time}-equipment-list`);
+function collectEquipment(pf) {
+  const panel = document.getElementById(`${pf}-equipment-list`);
   if (!panel) return '';
   const names=panel.querySelectorAll('.eq-name'), counts=panel.querySelectorAll('.eq-count');
   let lines=[];
@@ -1093,8 +1088,8 @@ async function sendReport(pkg, time) {
   const contractor = document.getElementById(`${pf}-contractor`)?.value.trim() || '';
   if (!contractor) { showToast(currentLang==='ar'?'أدخل اسم المقاول':'Enter contractor name','error'); return; }
 
-  const mp = collectManpower(`${pf}-manpower`);
-  const eq = collectEquipment(`${pf}-equipment`);
+  const mp = collectManpower(pf);
+  const eq = collectEquipment(pf);
   const workRows = pkg==='p1' ? collectWorkRowsP1(pf) : collectWorkRowsP2(pf);
   const missing = time==='evening' ? collectMissing(`${pf}-missing`) : '';
   const issues = time==='evening' ? (document.getElementById(`${pf}-issues`)?.value.trim()||'') : '';
