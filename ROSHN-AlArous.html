@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROSHN Al-Arous | Daily Site Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0f1117; --surface:#1a1d27; --surface2:#222636; --border:#2e3347;
+    --accent:#f5a623; --green:#22c55e; --red:#ef4444;
+    --text:#e8eaf0; --muted:#6b7280; --morning:#f5a623; --evening:#3b82f6;
+    --pkg1:#f5a623; --pkg2:#a78bfa;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Cairo',sans-serif;min-height:100vh;padding:16px;}
+
+  /* Lang */
+  .lang-bar{display:flex;justify-content:center;gap:8px;margin-bottom:16px;}
+  .lang-btn{padding:7px 20px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+  .lang-btn.active{background:var(--accent);color:#0f1117;border-color:var(--accent);}
+
+  /* Header */
+  .header{text-align:center;padding:16px 20px 12px;margin-bottom:16px;}
+  .header::after{content:'';display:block;width:60px;height:3px;background:var(--accent);margin:10px auto 0;border-radius:2px;}
+  .header-badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+  .header h1{font-size:19px;font-weight:900;line-height:1.3;}
+  .header h1 span{color:var(--accent);}
+
+  /* Package switcher */
+  .pkg-switcher{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;background:var(--surface);padding:6px;border-radius:14px;border:1px solid var(--border);}
+  .pkg-btn{padding:11px 8px;border:none;border-radius:10px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;transition:all .25s;background:transparent;color:var(--muted);}
+  .pkg-btn.active-pkg1{background:var(--pkg1);color:#0f1117;}
+  .pkg-btn.active-pkg2{background:var(--pkg2);color:#fff;}
+  .pkg-icon{font-size:15px;display:block;margin-bottom:2px;}
+
+  /* Tab switcher */
+  .tab-switcher{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;background:var(--surface);padding:6px;border-radius:14px;border:1px solid var(--border);}
+  .tab-btn{padding:11px 8px;border:none;border-radius:10px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;transition:all .25s;background:transparent;color:var(--muted);}
+  .tab-btn.active-morning{background:var(--morning);color:#0f1117;}
+  .tab-btn.active-evening{background:var(--evening);color:#fff;}
+  .tab-icon{font-size:16px;display:block;margin-bottom:2px;}
+
+  /* Section */
+  .section{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:12px;overflow:hidden;}
+  .section-header{padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+  .section-header.morning{background:rgba(245,166,35,.08);}
+  .section-header.evening{background:rgba(59,130,246,.08);}
+  .section-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+  .morning .section-icon{background:rgba(245,166,35,.15);}
+  .evening .section-icon{background:rgba(59,130,246,.15);}
+  .section-title{font-size:13px;font-weight:700;}
+  .section-subtitle{font-size:11px;color:var(--muted);margin-top:1px;}
+  .section-body{padding:12px 16px;}
+
+  input[type="text"],input[type="date"],input[type="number"],textarea,select{
+    width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+    padding:10px 12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;
+    outline:none;transition:border-color .2s;-webkit-appearance:none;
+  }
+  input:focus,textarea:focus,select:focus{border-color:var(--accent);}
+  textarea{resize:vertical;min-height:65px;line-height:1.6;}
+  select option{background:var(--surface2);}
+
+  .mp-free-row,.eq-free-row{display:grid;grid-template-columns:1fr 80px;gap:8px;margin-bottom:8px;align-items:center;}
+  .mp-free-row input[type="number"],.eq-free-row input[type="number"]{text-align:center;font-weight:700;font-size:15px;}
+
+  /* Block cards */
+  .block-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;}
+  .block-toggle{padding:11px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;transition:background .2s;}
+  .block-toggle:hover{background:rgba(255,255,255,.04);}
+  .block-toggle-left{display:flex;align-items:center;gap:10px;}
+  .block-name{font-size:13px;font-weight:700;}
+  .block-range{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--muted);}
+  .block-chevron{font-size:12px;color:var(--muted);transition:transform .25s;}
+  .block-card.open .block-chevron{transform:rotate(180deg);}
+  .block-body{padding:12px 14px;display:none;border-top:1px solid var(--border);}
+  .block-card.open .block-body{display:block;}
+
+  /* Work rows */
+  .work-row{display:grid;grid-template-columns:120px 1fr;gap:8px;margin-bottom:10px;align-items:start;}
+  .work-tag{padding:8px 6px;border-radius:8px;font-size:10px;font-weight:700;text-align:center;border:1px solid transparent;line-height:1.4;}
+
+  /* P1 tags */
+  .tag-erection  {background:rgba(239,68,68,.12); border-color:rgba(239,68,68,.2);  color:#f87171;}
+  .tag-alignment {background:rgba(245,166,35,.12);border-color:rgba(245,166,35,.2); color:#fbbf24;}
+  .tag-grouting  {background:rgba(34,197,94,.12); border-color:rgba(34,197,94,.2);  color:#4ade80;}
+  .tag-sealant   {background:rgba(139,92,246,.12);border-color:rgba(139,92,246,.2); color:#a78bfa;}
+  .tag-repairing {background:rgba(20,184,166,.12);border-color:rgba(20,184,166,.2); color:#2dd4bf;}
+  .tag-mep       {background:rgba(249,115,22,.12);border-color:rgba(249,115,22,.2); color:#fb923c;}
+  .tag-screed    {background:rgba(234,179,8,.12); border-color:rgba(234,179,8,.2);  color:#facc15;}
+  .tag-foundation{background:rgba(168,85,247,.12);border-color:rgba(168,85,247,.2); color:#c084fc;}
+  .tag-accessories{background:rgba(236,72,153,.12);border-color:rgba(236,72,153,.2);color:#f472b6;}
+  .tag-offloading{background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.2); color:#818cf8;}
+
+  /* P2 tags */
+  .tag-mep-rect  {background:rgba(239,68,68,.12); border-color:rgba(239,68,68,.2);  color:#f87171;}
+  .tag-surfprep  {background:rgba(245,166,35,.12);border-color:rgba(245,166,35,.2); color:#fbbf24;}
+  .tag-painting  {background:rgba(34,197,94,.12); border-color:rgba(34,197,94,.2);  color:#4ade80;}
+  .tag-tiles-dry {background:rgba(20,184,166,.12);border-color:rgba(20,184,166,.2); color:#2dd4bf;}
+  .tag-tiles-wet {background:rgba(6,182,212,.12); border-color:rgba(6,182,212,.2);  color:#22d3ee;}
+  .tag-alum-wd   {background:rgba(139,92,246,.12);border-color:rgba(139,92,246,.2); color:#a78bfa;}
+  .tag-alum-cab  {background:rgba(168,85,247,.12);border-color:rgba(168,85,247,.2); color:#c084fc;}
+  .tag-metal     {background:rgba(249,115,22,.12);border-color:rgba(249,115,22,.2); color:#fb923c;}
+  .tag-wood-door {background:rgba(234,179,8,.12); border-color:rgba(234,179,8,.2);  color:#facc15;}
+  .tag-wp-ext    {background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.2); color:#60a5fa;}
+  .tag-wp-wet    {background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.2); color:#34d399;}
+  .tag-kitchen   {background:rgba(236,72,153,.12);border-color:rgba(236,72,153,.2); color:#f472b6;}
+  .tag-paver     {background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.2); color:#818cf8;}
+  .tag-marble    {background:rgba(244,63,94,.12); border-color:rgba(244,63,94,.2);  color:#fb7185;}
+  .tag-mep-elec  {background:rgba(250,204,21,.12);border-color:rgba(250,204,21,.2); color:#fde047;}
+  .tag-mep-mech  {background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.2); color:#6ee7b7;}
+  .tag-false-ceil{background:rgba(192,132,252,.12);border-color:rgba(192,132,252,.2);color:#e879f9;}
+
+  /* Villa rows */
+  .villa-header{display:grid;grid-template-columns:1fr 100px;gap:6px;margin-bottom:4px;padding:0 2px;}
+  .villa-header span{font-size:10px;font-weight:600;color:var(--muted);}
+  .villa-row{display:grid;grid-template-columns:1fr 100px;gap:6px;margin-bottom:6px;}
+
+  /* Villa only (no floor) */
+  .villa-only-row{margin-bottom:6px;}
+
+  /* Painting row: villa + floor + textarea */
+  .painting-header{display:grid;grid-template-columns:1fr 100px;gap:6px;margin-bottom:4px;padding:0 2px;}
+  .painting-header span{font-size:10px;font-weight:600;color:var(--muted);}
+  .painting-entry{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:8px;}
+  .painting-entry .row1{display:grid;grid-template-columns:1fr 100px;gap:6px;margin-bottom:6px;}
+  .painting-entry textarea{min-height:50px;font-size:12px;}
+
+  /* Metal row: villa only */
+  .metal-row{margin-bottom:6px;}
+
+  /* Marble row: villa only */
+  .marble-row{margin-bottom:6px;}
+
+  /* Acc rows */
+  .acc-header{display:grid;grid-template-columns:1fr 100px 70px;gap:6px;margin-bottom:4px;padding:0 2px;}
+  .acc-header span{font-size:10px;font-weight:600;color:var(--muted);}
+  .acc-piece-label{font-size:10px;font-weight:700;color:var(--muted);margin:8px 0 4px;padding:4px 8px;background:rgba(255,255,255,.03);border-radius:6px;border:1px solid var(--border);}
+  .acc-row{display:grid;grid-template-columns:1fr 100px 70px;gap:6px;margin-bottom:6px;}
+  .acc-row input[type="number"]{text-align:center;font-weight:700;}
+
+  /* Missing materials */
+  .missing-row{display:grid;grid-template-columns:1fr 90px 70px;gap:8px;margin-bottom:8px;}
+  .missing-header{display:grid;grid-template-columns:1fr 90px 70px;gap:8px;margin-bottom:6px;}
+  .missing-header span{font-size:10px;font-weight:600;color:var(--muted);padding:0 4px;}
+
+  .add-btn{width:100%;padding:9px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--muted);font-family:'Cairo',sans-serif;font-size:12px;cursor:pointer;margin-top:4px;transition:all .2s;}
+  .add-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+  .submit-btn{width:100%;padding:15px;border:none;border-radius:14px;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;margin-top:8px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;}
+  .submit-morning{background:var(--morning);color:#0f1117;}
+  .submit-evening{background:var(--evening);color:#fff;}
+  .submit-btn:active{transform:scale(.98);}
+  .submit-btn:disabled{opacity:.5;cursor:not-allowed;}
+
+  .pkg-panel{display:none;}
+  .pkg-panel.active{display:block;}
+  .form-panel{display:none;}
+  .form-panel.active{display:block;}
+  .date-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+  .mp-section-label{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px;display:grid;grid-template-columns:1fr 80px;gap:8px;padding:0 2px;}
+  .mp-section-label span:last-child{text-align:center;}
+
+  /* Mep-subgroup label */
+  .mep-group-label{font-size:11px;font-weight:700;color:var(--accent);margin:10px 0 6px;padding:4px 10px;background:rgba(245,166,35,.07);border-radius:6px;border-left:3px solid var(--accent);}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:13px;font-weight:600;z-index:999;transition:transform .3s ease;white-space:nowrap;display:flex;align-items:center;gap:8px;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast.success{border-color:var(--green);color:var(--green);}
+  .toast.error{border-color:var(--red);color:var(--red);}
+  .toast.loading{border-color:var(--accent);color:var(--accent);}
+
+  body.ltr{direction:ltr;}
+  body.ltr input,body.ltr textarea,body.ltr select,body.ltr button{font-family:'IBM Plex Mono',sans-serif;}
+  .mp-section-label-p{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px;}
+</style>
+</head>
+<body>
+
+<!-- Lang -->
+<div class="lang-bar">
+  <button class="lang-btn" id="lang-ar" onclick="setLang('ar')">العربية 🇸🇦</button>
+  <button class="lang-btn active" id="lang-en" onclick="setLang('en')">English 🇬🇧</button>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-badge">ROSHN Al-Arous · 75 Villas</div>
+  <h1>Daily Site Report<br><span>تقرير الموقع اليومي</span></h1>
+</div>
+
+<!-- Package Switcher -->
+<div class="pkg-switcher">
+  <button class="pkg-btn active-pkg1" id="btn-pkg1" onclick="switchPkg('pkg1')">
+    <span class="pkg-icon">🏗</span>
+    <span data-ar="الباكج الأول — بريكاست" data-en="Package 1 — Precast">Package 1 — Precast</span>
+  </button>
+  <button class="pkg-btn" id="btn-pkg2" onclick="switchPkg('pkg2')">
+    <span class="pkg-icon">🪟</span>
+    <span data-ar="الباكج الثاني — تشطيبات" data-en="Package 2 — Finishing">Package 2 — Finishing</span>
+  </button>
+</div>
+
+<!-- ════════════════════════════════════════
+     PACKAGE 1
+════════════════════════════════════════ -->
+<div class="pkg-panel active" id="panel-pkg1">
+
+  <!-- Tab switcher P1 -->
+  <div class="tab-switcher">
+    <button class="tab-btn active-morning" id="p1-tab-morning" onclick="switchTab('p1','morning')">
+      <span class="tab-icon">☀️</span>
+      <span data-ar="صباح" data-en="Morning">Morning</span>
+    </button>
+    <button class="tab-btn" id="p1-tab-evening" onclick="switchTab('p1','evening')">
+      <span class="tab-icon">🌙</span>
+      <span data-ar="مساء" data-en="Evening">Evening</span>
+    </button>
+  </div>
+
+  <!-- Morning P1 -->
+  <div class="form-panel active" id="p1-panel-morning">
+    <div class="section">
+      <div class="section-header morning">
+        <div class="section-icon">📅</div>
+        <div><div class="section-title" data-ar="معلومات التقرير" data-en="Report Info">Report Info</div></div>
+      </div>
+      <div class="section-body">
+        <div class="date-row">
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px" data-ar="التاريخ" data-en="Date">Date</div>
+            <input type="date" id="p1m-date">
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px" data-ar="اسم المقاول" data-en="Contractor">Contractor</div>
+            <input type="text" id="p1m-contractor" data-placeholder-ar="اسم الشركة..." data-placeholder-en="Company name..." placeholder="Company name...">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manpower P1M -->
+    <div class="section">
+      <div class="section-header morning">
+        <div class="section-icon">👷</div>
+        <div>
+          <div class="section-title" data-ar="العمالة" data-en="Manpower">Manpower</div>
+          <div class="section-subtitle" data-ar="أدخل المسمى والعدد" data-en="Enter role and count">Enter role and count</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="mp-section-label">
+          <span data-ar="المسمى" data-en="Role">Role</span>
+          <span data-ar="العدد" data-en="No.">No.</span>
+        </div>
+        <div id="p1m-manpower-list">
+          <div class="mp-free-row"><input type="text" class="mp-role" data-placeholder-ar="مثال: فورمان..." data-placeholder-en="e.g. Foreman..." placeholder="e.g. Foreman..."><input type="number" min="0" placeholder="0" class="mp-count"></div>
+          <div class="mp-free-row"><input type="text" class="mp-role" data-placeholder-ar="مثال: فورمان..." data-placeholder-en="e.g. Foreman..." placeholder="e.g. Foreman..."><input type="number" min="0" placeholder="0" class="mp-count"></div>
+          <div class="mp-free-row"><input type="text" class="mp-role" data-placeholder-ar="مثال: فورمان..." data-placeholder-en="e.g. Foreman..." placeholder="e.g. Foreman..."><input type="number" min="0" placeholder="0" class="mp-count"></div>
+          <div class="mp-free-row"><input type="text" class="mp-role" data-placeholder-ar="مثال: فورمان..." data-placeholder-en="e.g. Foreman..." placeholder="e.g. Foreman..."><input type="number" min="0" placeholder="0" class="mp-count"></div>
+        </div>
+        <button class="add-btn" onclick="addMpRow('p1m-manpower-list')" data-ar="+ أضف صف" data-en="+ Add Row">+ Add Row</button>
+      </div>
+    </div>
+
+    <!-- Equipment P1M -->
+    <div class="section">
+      <div class="section-header morning">
+        <div class="section-icon">🏗</div>
+        <div><div class="section-title" data-ar="المعدات" data-en="Equipment">Equipment</div></div>
+      </div>
+      <div class="section-body">
+        <div class="mp-section-label">
+          <span data-ar="المعدة" data-en="Equipment">Equipment</span>
+          <span data-ar="العدد" data-en="No.">No.</span>
+        </div>
+        <div id="p1m-equipment-list">
+          <div class="eq-free-row"><input type="text" class="eq-name" value="Mobile Crane"><input type="number" class="eq-count" min="0" placeholder="0"></div>
+          <div class="eq-free-row"><input type="text" class="eq-name" value="Manlift"><input type="number" class="eq-count" min="0" placeholder="0"></div>
+          <div class="eq-free-row"><input type="text" class="eq-name" value="Grout Mixer"><input type="number" class="eq-count" min="0" placeholder="0"></div>
+        </div>
+        <button class="add-btn" onclick="addEqRow('p1m-equipment-list')" data-ar="+ أضف معدة" data-en="+ Add Equipment">+ Add Equipment</button>
+      </div>
+    </div>
+
+    <!-- Work Plan P1M -->
+    <div class="section">
+      <div class="section-header morning">
+        <div class="section-icon">📍</div>
+        <div>
+          <div class="section-title" data-ar="خطة العمل اليوم" data-en="Today's Work Plan">Today's Work Plan</div>
+          <div class="section-subtitle" data-ar="اختر الفلل لكل عملية" data-en="Select villas per activity">Select villas per activity</div>
+        </div>
+      </div>
+      <div class="section-body" id="p1m-blocks"></div>
+    </div>
+
+    <button class="submit-btn submit-morning" id="btn-p1m" onclick="sendReport('p1','morning')">
+      <span>📤</span> <span data-ar="إرسال تقرير الصباح" data-en="Send Morning Report">Send Morning Report</span>
+    </button>
+  </div>
+
+  <!-- Evening P1 -->
+  <div class="form-panel" id="p1-panel-evening">
+    <div class="section">
+      <div class="section-header evening">
+        <div class="section-icon">📅</div>
+        <div><div class="section-title" data-ar="معلومات التقرير" data-en="Report Info">Report Info</div></div>
+      </div>
+      <div class="section-body">
+        <div class="date-row">
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px" data-ar="التاريخ" data-en="Date">Date</div>
+            <input type="date" id="p1e-date">
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px" data-ar="اسم المقاول" data-en="Contractor">Contractor</div>
+            <input type="text" id="p1e-contractor" data-placeholder-ar="اسم الشركة..." data-placeholder-en="Company name..." placeholder="Company name...">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header evening">
+        <div class="section-icon">✅</div>
+        <div>
+          <div class="section-title" data-ar="الأعمال المنجزة" data-en="Completed Works">Completed Works</div>
+          <div class="section-subtitle" data-ar="اختر الفلل المنجزة" data-en="Select completed villas">Select completed villas</div>
+        </div>
+      </div>
+      <div class="section-body" id="p1e-blocks"></div>
+    </div>
+
+    <!-- Missing P1E -->
+    <div class="section">
+      <div class="section-header evening">
+        <div class="section-icon">🔩</div>
+        <div>
+          <div class="section-title" data-ar="نواقص المواد" data-en="Missing Materials">Missing Materials</div>
+          <div class="section-subtitle" data-ar="ما يحتاج توريد" data-en="Items needed from factory">Items needed from factory</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="missing-header">
+          <span data-ar="القطعة" data-en="Item">Item</span>
+          <span data-ar="الفيلا" data-en="Villa">Villa</span>
+          <span data-ar="الكمية" data-en="Qty">Qty</span>
+        </div>
+        <div id="p1e-missing-list">
+          <div class="missing-row">
+            <input type="text" class="missing-item" data-placeholder-ar="اسم القطعة..." data-placeholder-en="Item name..." placeholder="Item name...">
+            <input type="text" class="missing-villa" data-placeholder-ar="الفيلا" data-placeholder-en="Villa" placeholder="Villa">
+            <input type="text" class="missing-qty" data-placeholder-ar="الكمية" data-placeholder-en="Qty" placeholder="Qty">
+          </div>
+        </div>
+        <button class="add-btn" onclick="addMissingRow('p1e-missing-list')" data-ar="+ أضف قطعة" data-en="+ Add Item">+ Add Item</button>
+      </div>
+    </div>
+
+    <!-- Issues P1E -->
+    <div class="section">
+      <div class="section-header evening">
+        <div class="section-icon">⚠️</div>
+        <div><div class="section-title" data-ar="مشاكل وتأخيرات" data-en="Issues & Delays">Issues & Delays</div></div>
+      </div>
+      <div class="section-body">
+        <textarea id="p1e-issues" data-placeholder-ar="اذكر أي مشاكل..." data-placeholder-en="Describe any issues..." placeholder="Describe any issues..."></textarea>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header evening">
+        <div class="section-icon">📝</div>
+        <div><div class="section-title" data-ar="ملاحظات" data-en="Notes">Notes</div></div>
+      </div>
+      <div class="section-body">
+        <textarea id="p1e-notes" data-placeholder-ar="ملاحظات إضافية..." data-placeholder-en="Additional notes..." placeholder="Additional notes..."></textarea>
+      </div>
+    </div>
+
+    <button class="submit-btn submit-evening" id="btn-p1e" onclick="sendReport('p1','evening')">
+      <span>📤</span> <span data-ar="إرسال تقرير المساء" data-en="Send Evening Report">Send Evening Report</span>
+    </button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PACKAGE 2
+════════════════════════════════════════ -->
+<div class="pkg-panel" id="panel-pkg2">
+
+  <div class="tab-switcher">
+    <button class="tab-btn active-morning" id="p2-tab-morning" onclick="switchTab('p2','morning')">
+      <span class="tab-icon">☀️</span>
+      <span data-ar="صباح" data-en="Morning">Morning</span>
+    </button>
+    <button class="tab-btn" id="p2-tab-evening" onclick="switchTab('p2','evening')">
+      <span class="tab-icon">🌙</span>
+      <span data-ar="مساء" data-en="Evening">Evening</span>
+    </button>
+  </div>
+
+  <!-- Morning P2 -->
+  <div class="form-panel active" id="p2-panel-morning">
+    <div class="section">
+      <div class="section-header morning">
+        <div class="section-icon">📅</div>
+        <div><div class="section-title" data-ar="معلومات التقرير" data-en="Report Info">Report Info</div></div>
+      </div>
+      <div class="section-body">
+        <div class="date-row">
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px" data-ar="التاريخ" data-en="Date">Date</div>
+            <input type="date" id="p2m-date">
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px" data-ar="اسم المقاول" data-en="Contractor">Contractor</div>
+            <input type="text" id="p2m-contractor" data-placeholder-ar="اسم الشركة..." data-placeholder-en="Company name..." placeholder="Company name...">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header morning">
+        <div class="section-icon">👷</div>
+        <div>
+          <div class="section-title" data-ar="العمالة" data-en="Manpower">Manpower</div>
+          <div class="section-subtitle" data-ar="أدخل المسمى والعدد" data-en="Enter role and count">Enter role and count</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="mp-section-label">
+          <span data-ar="المسمى" data-en="Role">Role</span>
+          <span data-ar="العدد" data-en="No.">No.</span>
+        </div>
+        <div id="p2m-manpower-list">
+          <div class="mp-free-row"><input type="text" class="mp-role" data-placeholder-ar="مثال: فورمان..." data-placeholder-en="e.g. Foreman..." placeholder="e.g. Foreman..."><input type="number" min="0" placeholder="0" class="mp-count"></div>
+          <div class="mp-free-row"><input type="text" class="mp-role" data-placeholder-ar="مثال: فورمان..." data-placeholder-en="e.g. Foreman..." placeholder="e.g. Foreman..."><input type="number" min="0" placeholder="0" class="mp-count"></div>
+          <div class="mp-free-row"><input type="text" class="mp-role" data-placeholder-ar="مثال: فورمان..." data-placeholder-en="e.g. Foreman..." placeholder="e.g. Foreman..."><input type="number" min="0" placeholder="0" class="mp-count"></div>
+          <div class="mp-free-row"><input type="text" class="mp-role" data-placeholder-ar="مثال: فورمان..." data-placeholder-en="e.g. Foreman..." placeholder="e.g. Foreman..."><input type="number" min="0" placeholder="0" class="mp-count"></div>
+        </div>
+        <button class="add-btn" onclick="addMpRow('p2m-manpower-list')" data-ar="+ أضف صف" data-en="+ Add Row">+ Add Row</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header morning">
+        <div class="section-icon">🏗</div>
+        <div><div class="section-title" data-ar="المعدات" data-en="Equipment">Equipment</div></div>
+      </div>
+      <div class="section-body">
+        <div class="mp-section-label">
+          <span data-ar="المعدة" data-en="Equipment">Equipment</span>
+          <span data-ar="العدد" data-en="No.">No.</span>
+        </div>
+        <div id="p2m-equipment-list">
+          <div class="eq-free-row"><input type="text" class="eq-name" placeholder="Equipment name..."><input type="number" class="eq-count" min="0" placeholder="0"></div>
+          <div class="eq-free-row"><input type="text" class="eq-name" placeholder="Equipment name..."><input type="number" class="eq-count" min="0" placeholder="0"></div>
+        </div>
+        <button class="add-btn" onclick="addEqRow('p2m-equipment-list')" data-ar="+ أضف معدة" data-en="+ Add Equipment">+ Add Equipment</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header morning">
+        <div class="section-icon">📍</div>
+        <div>
+          <div class="section-title" data-ar="خطة العمل اليوم" data-en="Today's Work Plan">Today's Work Plan</div>
+          <div class="section-subtitle" data-ar="اختر الفلل لكل نشاط" data-en="Select villas per activity">Select villas per activity</div>
+        </div>
+      </div>
+      <div class="section-body" id="p2m-blocks"></div>
+    </div>
+
+    <button class="submit-btn submit-morning" id="btn-p2m" onclick="sendReport('p2','morning')">
+      <span>📤</span> <span data-ar="إرسال تقرير الصباح" data-en="Send Morning Report">Send Morning Report</span>
+    </button>
+  </div>
+
+  <!-- Evening P2 -->
+  <div class="form-panel" id="p2-panel-evening">
+    <div class="section">
+      <div class="section-header evening">
+        <div class="section-icon">📅</div>
+        <div><div class="section-title" data-ar="معلومات التقرير" data-en="Report Info">Report Info</div></div>
+      </div>
+      <div class="section-body">
+        <div class="date-row">
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px" data-ar="التاريخ" data-en="Date">Date</div>
+            <input type="date" id="p2e-date">
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px" data-ar="اسم المقاول" data-en="Contractor">Contractor</div>
+            <input type="text" id="p2e-contractor" data-placeholder-ar="اسم الشركة..." data-placeholder-en="Company name..." placeholder="Company name...">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header evening">
+        <div class="section-icon">✅</div>
+        <div>
+          <div class="section-title" data-ar="الأعمال المنجزة" data-en="Completed Works">Completed Works</div>
+          <div class="section-subtitle" data-ar="اختر الفلل المنجزة" data-en="Select completed villas">Select completed villas</div>
+        </div>
+      </div>
+      <div class="section-body" id="p2e-blocks"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-header evening">
+        <div class="section-icon">🔩</div>
+        <div>
+          <div class="section-title" data-ar="نواقص المواد" data-en="Missing Materials">Missing Materials</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="missing-header">
+          <span data-ar="القطعة" data-en="Item">Item</span>
+          <span data-ar="الفيلا" data-en="Villa">Villa</span>
+          <span data-ar="الكمية" data-en="Qty">Qty</span>
+        </div>
+        <div id="p2e-missing-list">
+          <div class="missing-row">
+            <input type="text" class="missing-item" placeholder="Item name...">
+            <input type="text" class="missing-villa" placeholder="Villa">
+            <input type="text" class="missing-qty" placeholder="Qty">
+          </div>
+        </div>
+        <button class="add-btn" onclick="addMissingRow('p2e-missing-list')" data-ar="+ أضف قطعة" data-en="+ Add Item">+ Add Item</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header evening">
+        <div class="section-icon">⚠️</div>
+        <div><div class="section-title" data-ar="مشاكل وتأخيرات" data-en="Issues & Delays">Issues & Delays</div></div>
+      </div>
+      <div class="section-body">
+        <textarea id="p2e-issues" placeholder="Describe any issues..."></textarea>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header evening">
+        <div class="section-icon">📝</div>
+        <div><div class="section-title" data-ar="ملاحظات" data-en="Notes">Notes</div></div>
+      </div>
+      <div class="section-body">
+        <textarea id="p2e-notes" placeholder="Additional notes..."></textarea>
+      </div>
+    </div>
+
+    <button class="submit-btn submit-evening" id="btn-p2e" onclick="sendReport('p2','evening')">
+      <span>📤</span> <span data-ar="إرسال تقرير المساء" data-en="Send Evening Report">Send Evening Report</span>
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwYhSP09cSA-ZJJaH9YjftE2gASjitlnJ9Ct5KzPNH9gnEESfpkqRAu8Mv9FEcRckng/exec';
+
+// ─── Data ─────────────────────────────────────────────────
+const BLOCKS = [
+  { num:'104', range:'1253–1269', villas: Array.from({length:17},(_,i)=>1253+i) },
+  { num:'105', range:'1270–1298', villas: Array.from({length:29},(_,i)=>1270+i) },
+  { num:'106', range:'1299–1327', villas: Array.from({length:29},(_,i)=>1299+i) },
+];
+
+const FLOORS_P1 = ['GF Panels','FF HCS','FF Panels','SF HCS','SF Panels','UR HCS'];
+const FLOORS_P2 = ['GF','FF','SF','RF','URF','External'];
+const FLOORS_P2_WD = ['GF','FF','SF']; // Windows & Doors, Wooden Doors, Wet area tiles, Wet waterproof
+const FLOORS_P2_WP_EXT = ['Roof','Upper Roof','Balcony'];
+const FLOORS_P2_PAVER = ['RF'];
+
+// Package 1 works
+const WORKS_P1 = [
+  { key:'erection',    tagClass:'tag-erection',    ar:'تركيب',              en:'Erection' },
+  { key:'alignment',   tagClass:'tag-alignment',   ar:'محاذاة',              en:'Alignment' },
+  { key:'grouting',    tagClass:'tag-grouting',    ar:'جراوت',              en:'Grouting' },
+  { key:'sealant',     tagClass:'tag-sealant',     ar:'سيلانت',             en:'Sealant' },
+  { key:'repairing',   tagClass:'tag-repairing',   ar:'ترميم / تجهيز سطح',  en:'Repairing & Surface Prep' },
+  { key:'mep',         tagClass:'tag-mep',         ar:'أعمال MEP',          en:'MEP Work' },
+  { key:'screed',      tagClass:'tag-screed',      ar:'تصبيب',              en:'Screed' },
+  { key:'offloading',  tagClass:'tag-offloading',  ar:'تشوين',              en:'Offloading' },
+  { key:'foundation',  tagClass:'tag-foundation',  ar:'أساسات',             en:'Foundation' },
+  { key:'accessories', tagClass:'tag-accessories', ar:'إكسسوارات',          en:'Accessories', isAccessories:true },
+];
+
+// Package 2 works — each has type: 'standard'|'villa-only'|'painting'|'marble'|'mep-group'
+const WORKS_P2 = [
+  { key:'mep-rect',   tagClass:'tag-mep-rect',  ar:'تصحيح MEP',          en:'MEP Rectification',       type:'standard', floors:FLOORS_P2 },
+  { key:'surf-prep',  tagClass:'tag-surfprep',  ar:'تجهيز السطح',         en:'Surface Preparation',     type:'standard', floors:FLOORS_P2 },
+  { key:'painting',   tagClass:'tag-painting',  ar:'دهانات',              en:'Painting',                type:'painting', floors:FLOORS_P2 },
+  { key:'tiles-dry',  tagClass:'tag-tiles-dry', ar:'بلاط — جاف',          en:'Tiles — Dry Area',        type:'standard', floors:FLOORS_P2 },
+  { key:'tiles-wet',  tagClass:'tag-tiles-wet', ar:'بلاط — رطب',          en:'Tiles — Wet Area',        type:'standard', floors:FLOORS_P2_WD },
+  { key:'alum-wd',    tagClass:'tag-alum-wd',   ar:'ألمنيوم — نوافذ/أبواب', en:'Aluminum — Windows & Doors', type:'standard', floors:FLOORS_P2_WD },
+  { key:'alum-cab',   tagClass:'tag-alum-cab',  ar:'ألمنيوم — كابينة خارجية', en:'Aluminum — External Cabinet', type:'villa-only' },
+  { key:'metal',      tagClass:'tag-metal',     ar:'أعمال معدنية',         en:'Metal Works & Accessories', type:'metal', subItems:['Doors','Shades','Balcony','Handrails'] },
+  { key:'wood-door',  tagClass:'tag-wood-door', ar:'أبواب خشبية',          en:'Wooden Doors & Accessories', type:'standard', floors:FLOORS_P2_WD },
+  { key:'wp-ext',     tagClass:'tag-wp-ext',    ar:'عزل — خارجي (Membrane)', en:'Waterproof — External (Membrane)', type:'standard', floors:FLOORS_P2_WP_EXT },
+  { key:'wp-wet',     tagClass:'tag-wp-wet',    ar:'عزل — رطب (سمنتي)',   en:'Waterproof — Wet Area (Cementitious)', type:'standard', floors:FLOORS_P2_WD },
+  { key:'kitchen',    tagClass:'tag-kitchen',   ar:'خزائن المطبخ',         en:'Kitchen Cabinet',         type:'standard', floors:FLOORS_P2 },
+  { key:'paver',      tagClass:'tag-paver',     ar:'أعمال البيفر',         en:'Paver Works',             type:'standard', floors:FLOORS_P2_PAVER },
+  { key:'marble',     tagClass:'tag-marble',    ar:'رخام',                 en:'Marble',                  type:'marble', subItems:['Staircase','Threshold'] },
+  { key:'mep-elec',   tagClass:'tag-mep-elec',  ar:'MEP — كهرباء',         en:'MEP — Electrical',        type:'mep-group', group:'electrical',
+    subItems:['Lighting','Door Bell','Socket & Switch','Dishwasher','TV & Data'] },
+  { key:'mep-mech',   tagClass:'tag-mep-mech',  ar:'MEP — ميكانيكا',       en:'MEP — Mechanical',        type:'mep-group', group:'mechanical',
+    subItems:['Floor Drain','Sanitary Fixture','Exhaust Fans','HVAC','Fire Alarm','Intercom','Solar Tank Heater','Water Heater'] },
+  { key:'false-ceil', tagClass:'tag-false-ceil',ar:'أسقف معلقة',           en:'False Ceiling',           type:'standard', floors:FLOORS_P2 },
+];
+
+let currentLang = 'en';
+let currentPkg = 'pkg1';
+
+// ─── Language ─────────────────────────────────────────────
+function setLang(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.body.dir = lang==='ar'?'rtl':'ltr';
+  document.body.classList.toggle('ltr', lang==='en');
+  document.getElementById('lang-ar').classList.toggle('active', lang==='ar');
+  document.getElementById('lang-en').classList.toggle('active', lang==='en');
+  document.querySelectorAll('[data-ar][data-en]').forEach(el => {
+    if (!['INPUT','TEXTAREA','SELECT'].includes(el.tagName)) el.textContent = el.dataset[lang];
+  });
+  document.querySelectorAll('[data-placeholder-ar]').forEach(el => {
+    el.placeholder = lang==='ar' ? el.dataset.placeholderAr : el.dataset.placeholderEn;
+  });
+  rebuildAllBlocks();
+}
+
+// ─── Package Switch ────────────────────────────────────────
+function switchPkg(pkg) {
+  currentPkg = pkg;
+  document.getElementById('panel-pkg1').classList.toggle('active', pkg==='pkg1');
+  document.getElementById('panel-pkg2').classList.toggle('active', pkg==='pkg2');
+  document.getElementById('btn-pkg1').className = 'pkg-btn' + (pkg==='pkg1'?' active-pkg1':'');
+  document.getElementById('btn-pkg2').className = 'pkg-btn' + (pkg==='pkg2'?' active-pkg2':'');
+}
+
+// ─── Tab Switch ────────────────────────────────────────────
+function switchTab(pkg, tab) {
+  ['morning','evening'].forEach(t => {
+    document.getElementById(`${pkg}-panel-${t}`).classList.toggle('active', t===tab);
+    const btn = document.getElementById(`${pkg}-tab-${t}`);
+    btn.className = 'tab-btn' + (t===tab ? ` active-${t}` : '');
+  });
+}
+
+// ─── Rebuild all blocks ────────────────────────────────────
+function rebuildAllBlocks() {
+  buildBlocksP1('p1m-blocks','p1m');
+  buildBlocksP1('p1e-blocks','p1e');
+  buildBlocksP2('p2m-blocks','p2m');
+  buildBlocksP2('p2e-blocks','p2e');
+}
+
+// ─── Package 1 block builder ───────────────────────────────
+function buildBlocksP1(containerId, prefix) {
+  const container = document.getElementById(containerId);
+  const saved = collectSavedP1(container);
+  container.innerHTML = '';
+  BLOCKS.forEach(block => {
+    const card = makeBlockCard(block);
+    const body = card.querySelector('.block-body');
+    WORKS_P1.forEach(work => {
+      const row = document.createElement('div');
+      row.className = 'work-row';
+      const tag = document.createElement('div');
+      tag.className = `work-tag ${work.tagClass}`;
+      tag.textContent = currentLang==='ar' ? work.ar : work.en;
+      row.appendChild(tag);
+      if (work.isAccessories) {
+        const right = document.createElement('div');
+        const accPieces = ['Shaft Slab & Cover','Scupper','Steel Angle','Lift Slab'];
+        accPieces.forEach(piece => {
+          const pieceKey = piece.replace(/[^a-z]/gi,'').toLowerCase();
+          const saveKey = `${prefix}-${block.num}|${work.key}_${pieceKey}`;
+          const prev = saved[saveKey] || [{villa:'',floor:'',qty:''}];
+          const lbl = document.createElement('div'); lbl.className='acc-piece-label'; lbl.textContent=piece;
+          const hdr = document.createElement('div'); hdr.className='acc-header';
+          hdr.innerHTML=`<span>${currentLang==='ar'?'رقم الفيلا':'Villa No.'}</span><span>${currentLang==='ar'?'الدور':'Floor'}</span><span>${currentLang==='ar'?'الكمية':'Qty'}</span>`;
+          const entriesDiv = document.createElement('div');
+          entriesDiv.className='villa-entries'; entriesDiv.dataset.block=`${prefix}-${block.num}`; entriesDiv.dataset.work=`${work.key}_${pieceKey}`;
+          prev.forEach(e => entriesDiv.appendChild(makeAccRow(block.villas, FLOORS_P1, e.villa||'', e.floor||'', e.qty||'')));
+          const addBtn = document.createElement('button'); addBtn.className='add-btn'; addBtn.style.marginTop='2px';
+          addBtn.textContent = currentLang==='ar'?'+ فيلا':'+ Villa';
+          addBtn.onclick = () => entriesDiv.appendChild(makeAccRow(block.villas, FLOORS_P1,'','',''));
+          right.appendChild(lbl); right.appendChild(hdr); right.appendChild(entriesDiv); right.appendChild(addBtn);
+        });
+        row.appendChild(right);
+      } else {
+        const saveKey = `${prefix}-${block.num}|${work.key}`;
+        const prev = saved[saveKey] || [{villa:'',floor:''}];
+        const right = makeStandardRight(block.villas, FLOORS_P1, prev, `${prefix}-${block.num}`, work.key);
+        row.appendChild(right);
+      }
+      body.appendChild(row);
+    });
+    container.appendChild(card);
+  });
+}
+
+function collectSavedP1(container) {
+  const saved = {};
+  container.querySelectorAll('.villa-entries').forEach(ve => {
+    const key = ve.dataset.block+'|'+ve.dataset.work;
+    saved[key] = [];
+    ve.querySelectorAll('.villa-row,.acc-row').forEach(r => {
+      saved[key].push({
+        villa: r.querySelector('.vl-villa')?.value||'',
+        floor: r.querySelector('.vl-floor')?.value||'',
+        qty:   r.querySelector('.vl-qty')?.value||''
+      });
+    });
+  });
+  return saved;
+}
+
+// ─── Package 2 block builder ───────────────────────────────
+function buildBlocksP2(containerId, prefix) {
+  const container = document.getElementById(containerId);
+  const saved = collectSavedP2(container);
+  container.innerHTML = '';
+  BLOCKS.forEach(block => {
+    const card = makeBlockCard(block);
+    const body = card.querySelector('.block-body');
+    WORKS_P2.forEach(work => {
+      const row = document.createElement('div');
+      row.className = 'work-row';
+      const tag = document.createElement('div');
+      tag.className = `work-tag ${work.tagClass}`;
+      tag.textContent = currentLang==='ar' ? work.ar : work.en;
+      row.appendChild(tag);
+      const right = document.createElement('div');
+
+      if (work.type === 'painting') {
+        // villa + floor + textarea description
+        const hdr = document.createElement('div'); hdr.className='painting-header';
+        hdr.innerHTML=`<span>${currentLang==='ar'?'رقم الفيلا':'Villa No.'}</span><span>${currentLang==='ar'?'الدور':'Floor'}</span>`;
+        right.appendChild(hdr);
+        const entriesDiv = document.createElement('div');
+        entriesDiv.className='villa-entries'; entriesDiv.dataset.block=`${prefix}-${block.num}`; entriesDiv.dataset.work=work.key; entriesDiv.dataset.type='painting';
+        const prev = saved[`${prefix}-${block.num}|${work.key}`] || [{villa:'',floor:'',desc:''}];
+        prev.forEach(e => entriesDiv.appendChild(makePaintingEntry(block.villas, work.floors, e.villa||'', e.floor||'', e.desc||'')));
+        const addBtn = document.createElement('button'); addBtn.className='add-btn'; addBtn.style.marginTop='4px';
+        addBtn.textContent = currentLang==='ar'?'+ فيلا':'+ Villa';
+        addBtn.onclick = () => entriesDiv.appendChild(makePaintingEntry(block.villas, work.floors,'','',''));
+        right.appendChild(entriesDiv); right.appendChild(addBtn);
+
+      } else if (work.type === 'villa-only') {
+        // villa select only, no floor
+        const entriesDiv = document.createElement('div');
+        entriesDiv.className='villa-entries'; entriesDiv.dataset.block=`${prefix}-${block.num}`; entriesDiv.dataset.work=work.key; entriesDiv.dataset.type='villa-only';
+        const prev = saved[`${prefix}-${block.num}|${work.key}`] || [{villa:''}];
+        prev.forEach(e => entriesDiv.appendChild(makeVillaOnlyRow(block.villas, e.villa||'')));
+        const addBtn = document.createElement('button'); addBtn.className='add-btn'; addBtn.style.marginTop='4px';
+        addBtn.textContent = currentLang==='ar'?'+ فيلا':'+ Villa';
+        addBtn.onclick = () => entriesDiv.appendChild(makeVillaOnlyRow(block.villas,''));
+        right.appendChild(entriesDiv); right.appendChild(addBtn);
+
+      } else if (work.type === 'metal') {
+        // sub-items, each villa-only
+        work.subItems.forEach(item => {
+          const lbl = document.createElement('div'); lbl.className='acc-piece-label'; lbl.textContent=item;
+          const itemKey = `${work.key}_${item.replace(/[^a-z]/gi,'').toLowerCase()}`;
+          const entriesDiv = document.createElement('div');
+          entriesDiv.className='villa-entries'; entriesDiv.dataset.block=`${prefix}-${block.num}`; entriesDiv.dataset.work=itemKey; entriesDiv.dataset.type='villa-only';
+          const prev = saved[`${prefix}-${block.num}|${itemKey}`] || [{villa:''}];
+          prev.forEach(e => entriesDiv.appendChild(makeVillaOnlyRow(block.villas, e.villa||'')));
+          const addBtn = document.createElement('button'); addBtn.className='add-btn'; addBtn.style.marginTop='2px';
+          addBtn.textContent = currentLang==='ar'?'+ فيلا':'+ Villa';
+          addBtn.onclick = () => entriesDiv.appendChild(makeVillaOnlyRow(block.villas,''));
+          right.appendChild(lbl); right.appendChild(entriesDiv); right.appendChild(addBtn);
+        });
+
+      } else if (work.type === 'marble') {
+        // sub-items (Staircase/Threshold), villa-only
+        work.subItems.forEach(item => {
+          const lbl = document.createElement('div'); lbl.className='acc-piece-label'; lbl.textContent=item;
+          const itemKey = `${work.key}_${item.replace(/[^a-z]/gi,'').toLowerCase()}`;
+          const entriesDiv = document.createElement('div');
+          entriesDiv.className='villa-entries'; entriesDiv.dataset.block=`${prefix}-${block.num}`; entriesDiv.dataset.work=itemKey; entriesDiv.dataset.type='villa-only';
+          const prev = saved[`${prefix}-${block.num}|${itemKey}`] || [{villa:''}];
+          prev.forEach(e => entriesDiv.appendChild(makeVillaOnlyRow(block.villas, e.villa||'')));
+          const addBtn = document.createElement('button'); addBtn.className='add-btn'; addBtn.style.marginTop='2px';
+          addBtn.textContent = currentLang==='ar'?'+ فيلا':'+ Villa';
+          addBtn.onclick = () => entriesDiv.appendChild(makeVillaOnlyRow(block.villas,''));
+          right.appendChild(lbl); right.appendChild(entriesDiv); right.appendChild(addBtn);
+        });
+
+      } else if (work.type === 'mep-group') {
+        // sub-items, villa-only
+        work.subItems.forEach(item => {
+          const lbl = document.createElement('div'); lbl.className='acc-piece-label'; lbl.textContent=item;
+          const itemKey = `${work.key}_${item.replace(/[^a-z&\s]/gi,'').trim().replace(/\s+/g,'').toLowerCase()}`;
+          const entriesDiv = document.createElement('div');
+          entriesDiv.className='villa-entries'; entriesDiv.dataset.block=`${prefix}-${block.num}`; entriesDiv.dataset.work=itemKey; entriesDiv.dataset.type='villa-only';
+          const prev = saved[`${prefix}-${block.num}|${itemKey}`] || [{villa:''}];
+          prev.forEach(e => entriesDiv.appendChild(makeVillaOnlyRow(block.villas, e.villa||'')));
+          const addBtn = document.createElement('button'); addBtn.className='add-btn'; addBtn.style.marginTop='2px';
+          addBtn.textContent = currentLang==='ar'?'+ فيلا':'+ Villa';
+          addBtn.onclick = () => entriesDiv.appendChild(makeVillaOnlyRow(block.villas,''));
+          right.appendChild(lbl); right.appendChild(entriesDiv); right.appendChild(addBtn);
+        });
+
+      } else {
+        // standard: villa + floor
+        const saveKey = `${prefix}-${block.num}|${work.key}`;
+        const prev = saved[saveKey] || [{villa:'',floor:''}];
+        const r = makeStandardRight(block.villas, work.floors, prev, `${prefix}-${block.num}`, work.key);
+        row.removeChild(row.lastChild);
+        row.appendChild(tag);
+        body.appendChild(row);
+        row.appendChild(r);
+        return;
+      }
+      row.appendChild(right);
+      body.appendChild(row);
+    });
+    container.appendChild(card);
+  });
+}
+
+function collectSavedP2(container) {
+  const saved = {};
+  container.querySelectorAll('.villa-entries').forEach(ve => {
+    const key = ve.dataset.block+'|'+ve.dataset.work;
+    saved[key] = [];
+    if (ve.dataset.type === 'painting') {
+      ve.querySelectorAll('.painting-entry').forEach(e => {
+        saved[key].push({
+          villa: e.querySelector('.vl-villa')?.value||'',
+          floor: e.querySelector('.vl-floor')?.value||'',
+          desc:  e.querySelector('textarea')?.value||''
+        });
+      });
+    } else if (ve.dataset.type === 'villa-only') {
+      ve.querySelectorAll('.villa-only-row select').forEach(s => {
+        saved[key].push({ villa: s.value||'' });
+      });
+    } else {
+      ve.querySelectorAll('.villa-row').forEach(r => {
+        saved[key].push({ villa: r.querySelector('.vl-villa')?.value||'', floor: r.querySelector('.vl-floor')?.value||'' });
+      });
+    }
+  });
+  return saved;
+}
+
+// ─── Block card maker ──────────────────────────────────────
+function makeBlockCard(block) {
+  const card = document.createElement('div');
+  card.className = 'block-card';
+  card.innerHTML = `
+    <div class="block-toggle" onclick="toggleBlock(this)">
+      <div class="block-toggle-left">
+        <div class="block-name">Block ${block.num}</div>
+        <div class="block-range">${block.range}</div>
+      </div>
+      <div class="block-chevron">▼</div>
+    </div>
+    <div class="block-body"></div>
+  `;
+  return card;
+}
+
+// ─── Row makers ────────────────────────────────────────────
+function makeStandardRight(villas, floors, prevEntries, blockKey, workKey) {
+  const right = document.createElement('div');
+  right.innerHTML = `<div class="villa-header"><span>${currentLang==='ar'?'رقم الفيلا':'Villa No.'}</span><span>${currentLang==='ar'?'الدور':'Floor'}</span></div>`;
+  const entriesDiv = document.createElement('div');
+  entriesDiv.className='villa-entries'; entriesDiv.dataset.block=blockKey; entriesDiv.dataset.work=workKey;
+  prevEntries.forEach(e => entriesDiv.appendChild(makeVillaFloorRow(villas, floors, e.villa||'', e.floor||'')));
+  const addBtn = document.createElement('button'); addBtn.className='add-btn'; addBtn.style.marginTop='4px';
+  addBtn.textContent = currentLang==='ar'?'+ فيلا':'+ Villa';
+  addBtn.onclick = () => entriesDiv.appendChild(makeVillaFloorRow(villas, floors,'',''));
+  right.appendChild(entriesDiv); right.appendChild(addBtn);
+  return right;
+}
+
+function makeVillaFloorRow(villas, floors, selVilla, selFloor) {
+  const row = document.createElement('div'); row.className='villa-row';
+  const sel = makeVillaSelect(villas, selVilla);
+  const fSel = makeFloorSelect(floors, selFloor);
+  row.appendChild(sel); row.appendChild(fSel);
+  return row;
+}
+
+function makeVillaOnlyRow(villas, selVilla) {
+  const row = document.createElement('div'); row.className='villa-only-row';
+  row.appendChild(makeVillaSelect(villas, selVilla));
+  return row;
+}
+
+function makePaintingEntry(villas, floors, selVilla, selFloor, desc) {
+  const entry = document.createElement('div'); entry.className='painting-entry';
+  const row1 = document.createElement('div'); row1.className='row1';
+  row1.appendChild(makeVillaSelect(villas, selVilla));
+  row1.appendChild(makeFloorSelect(floors, selFloor));
+  entry.appendChild(row1);
+  const ta = document.createElement('textarea');
+  ta.placeholder = currentLang==='ar'?'صف أعمال الدهان...':'Describe the painting works...';
+  ta.value = desc;
+  entry.appendChild(ta);
+  return entry;
+}
+
+function makeAccRow(villas, floors, selVilla, selFloor, selQty) {
+  const row = document.createElement('div'); row.className='acc-row';
+  row.appendChild(makeVillaSelect(villas, selVilla));
+  row.appendChild(makeFloorSelect(floors, selFloor));
+  const qty = document.createElement('input'); qty.type='number'; qty.className='vl-qty'; qty.min='0'; qty.placeholder='Qty'; qty.value=selQty;
+  row.appendChild(qty);
+  return row;
+}
+
+function makeVillaSelect(villas, selected) {
+  const sel = document.createElement('select'); sel.className='vl-villa';
+  const empty = document.createElement('option'); empty.value=''; empty.textContent=currentLang==='ar'?'— اختر فيلا —':'— Select Villa —';
+  sel.appendChild(empty);
+  villas.forEach(v => {
+    const opt = document.createElement('option'); opt.value=v; opt.textContent=`VL-${v}`;
+    if (String(v)===String(selected)||`VL-${v}`===selected) opt.selected=true;
+    sel.appendChild(opt);
+  });
+  return sel;
+}
+
+function makeFloorSelect(floors, selected) {
+  const sel = document.createElement('select'); sel.className='vl-floor';
+  const empty = document.createElement('option'); empty.value=''; empty.textContent=currentLang==='ar'?'الدور':'Floor';
+  sel.appendChild(empty);
+  floors.forEach(f => {
+    const opt = document.createElement('option'); opt.value=f; opt.textContent=f;
+    if (f===selected) opt.selected=true;
+    sel.appendChild(opt);
+  });
+  return sel;
+}
+
+function toggleBlock(el) { el.closest('.block-card').classList.toggle('open'); }
+
+// ─── Dynamic rows ──────────────────────────────────────────
+function addMpRow(listId) {
+  const list = document.getElementById(listId);
+  const row = document.createElement('div'); row.className='mp-free-row';
+  const ph = currentLang==='ar'?'مثال: فورمان...':'e.g. Foreman...';
+  row.innerHTML=`<input type="text" class="mp-role" placeholder="${ph}"><input type="number" min="0" placeholder="0" class="mp-count">`;
+  list.appendChild(row);
+}
+function addEqRow(listId) {
+  const list = document.getElementById(listId);
+  const row = document.createElement('div'); row.className='eq-free-row';
+  row.innerHTML=`<input type="text" class="eq-name" placeholder="Equipment..."><input type="number" class="eq-count" min="0" placeholder="0">`;
+  list.appendChild(row);
+}
+function addMissingRow(listId) {
+  const list = document.getElementById(listId);
+  const row = document.createElement('div'); row.className='missing-row';
+  row.innerHTML=`<input type="text" class="missing-item" placeholder="Item..."><input type="text" class="missing-villa" placeholder="Villa"><input type="text" class="missing-qty" placeholder="Qty">`;
+  list.appendChild(row);
+}
+
+// ─── Collect data ──────────────────────────────────────────
+function collectManpower(prefix) {
+  const panel = document.getElementById(`${prefix}-manpower-list`);
+  if (!panel) return {text:'', total:0};
+  const roles = panel.querySelectorAll('.mp-role');
+  const counts = panel.querySelectorAll('.mp-count');
+  let lines=[], total=0;
+  roles.forEach((r,i) => {
+    const role=r.value.trim(), count=parseInt(counts[i]?.value)||0;
+    if (role&&count>0) { lines.push(`${role}: ${count}`); total+=count; }
+  });
+  return {text:lines.join(' | '), total};
+}
+function collectEquipment(prefix) {
+  const panel = document.getElementById(`${prefix}-equipment-list`);
+  if (!panel) return '';
+  const names=panel.querySelectorAll('.eq-name'), counts=panel.querySelectorAll('.eq-count');
+  let lines=[];
+  names.forEach((n,i) => { if(n.value.trim()) lines.push(`${n.value.trim()}: ${parseInt(counts[i]?.value)||0}`); });
+  return lines.join(' | ');
+}
+function collectMissing(prefix) {
+  const panel = document.getElementById(`${prefix}-missing-list`);
+  if (!panel) return '';
+  const items=panel.querySelectorAll('.missing-item'), villas=panel.querySelectorAll('.missing-villa'), qtys=panel.querySelectorAll('.missing-qty');
+  let lines=[];
+  items.forEach((item,i) => {
+    const n=item.value.trim(); if(!n) return;
+    lines.push(`${n}${villas[i]?.value?' (VL-'+villas[i].value+')':''}${qtys[i]?.value?' x'+qtys[i].value:''}`);
+  });
+  return lines.join(' | ');
+}
+
+function collectWorkRowsP1(prefix) {
+  const rows=[];
+  BLOCKS.forEach(block => {
+    WORKS_P1.forEach(work => {
+      if (work.isAccessories) {
+        ['Shaft Slab & Cover','Scupper','Steel Angle','Lift Slab'].forEach(piece => {
+          const pieceKey=piece.replace(/[^a-z]/gi,'').toLowerCase();
+          const container=document.querySelector(`.villa-entries[data-block="${prefix}-${block.num}"][data-work="${work.key}_${pieceKey}"]`);
+          if (!container) return;
+          const entries=[];
+          container.querySelectorAll('.acc-row').forEach(r => {
+            const v=r.querySelector('.vl-villa')?.value.trim(), f=r.querySelector('.vl-floor')?.value.trim(), q=r.querySelector('.vl-qty')?.value.trim();
+            if (v) entries.push(`VL-${v}${f?' '+f:''} x${q||'0'}`);
+          });
+          if (entries.length) rows.push({ block:`Block ${block.num}`, work_en:`Accessories - ${piece}`, work_ar:`إكسسوارات - ${piece}`, villas:entries.join(', ') });
+        });
+      } else {
+        const container=document.querySelector(`.villa-entries[data-block="${prefix}-${block.num}"][data-work="${work.key}"]`);
+        if (!container) return;
+        const entries=[];
+        container.querySelectorAll('.villa-row').forEach(r => {
+          const v=r.querySelector('.vl-villa')?.value.trim(), f=r.querySelector('.vl-floor')?.value.trim();
+          if (v) entries.push(`VL-${v}${f?' '+f:''}`);
+        });
+        if (entries.length) rows.push({ block:`Block ${block.num}`, work_en:work.en, work_ar:work.ar, villas:entries.join(', ') });
+      }
+    });
+  });
+  return rows;
+}
+
+function collectWorkRowsP2(prefix) {
+  const rows=[];
+  BLOCKS.forEach(block => {
+    WORKS_P2.forEach(work => {
+      if (work.type==='painting') {
+        const container=document.querySelector(`.villa-entries[data-block="${prefix}-${block.num}"][data-work="${work.key}"]`);
+        if (!container) return;
+        const entries=[];
+        container.querySelectorAll('.painting-entry').forEach(e => {
+          const v=e.querySelector('.vl-villa')?.value.trim(), f=e.querySelector('.vl-floor')?.value.trim(), d=e.querySelector('textarea')?.value.trim();
+          if (v) entries.push(`VL-${v}${f?' '+f:''}${d?' ['+d+']':''}`);
+        });
+        if (entries.length) rows.push({ block:`Block ${block.num}`, work_en:work.en, work_ar:work.ar, villas:entries.join(' | ') });
+
+      } else if (work.type==='villa-only') {
+        const container=document.querySelector(`.villa-entries[data-block="${prefix}-${block.num}"][data-work="${work.key}"]`);
+        if (!container) return;
+        const entries=[];
+        container.querySelectorAll('.villa-only-row select').forEach(s => { if(s.value) entries.push(`VL-${s.value}`); });
+        if (entries.length) rows.push({ block:`Block ${block.num}`, work_en:work.en, work_ar:work.ar, villas:entries.join(', ') });
+
+      } else if (['metal','marble','mep-group'].includes(work.type)) {
+        work.subItems.forEach(item => {
+          const itemKey=`${work.key}_${item.replace(/[^a-z&\s]/gi,'').trim().replace(/\s+/g,'').toLowerCase()}`;
+          const container=document.querySelector(`.villa-entries[data-block="${prefix}-${block.num}"][data-work="${itemKey}"]`);
+          if (!container) return;
+          const entries=[];
+          container.querySelectorAll('.villa-only-row select').forEach(s => { if(s.value) entries.push(`VL-${s.value}`); });
+          if (entries.length) rows.push({ block:`Block ${block.num}`, work_en:`${work.en} - ${item}`, work_ar:`${work.ar} - ${item}`, villas:entries.join(', ') });
+        });
+
+      } else {
+        const container=document.querySelector(`.villa-entries[data-block="${prefix}-${block.num}"][data-work="${work.key}"]`);
+        if (!container) return;
+        const entries=[];
+        container.querySelectorAll('.villa-row').forEach(r => {
+          const v=r.querySelector('.vl-villa')?.value.trim(), f=r.querySelector('.vl-floor')?.value.trim();
+          if (v) entries.push(`VL-${v}${f?' '+f:''}`);
+        });
+        if (entries.length) rows.push({ block:`Block ${block.num}`, work_en:work.en, work_ar:work.ar, villas:entries.join(', ') });
+      }
+    });
+  });
+  return rows;
+}
+
+// ─── Send ──────────────────────────────────────────────────
+async function sendReport(pkg, time) {
+  const pf = `${pkg}${time==='morning'?'m':'e'}`;
+  const date = document.getElementById(`${pf}-date`)?.value || '';
+  const contractor = document.getElementById(`${pf}-contractor`)?.value.trim() || '';
+  if (!contractor) { showToast(currentLang==='ar'?'أدخل اسم المقاول':'Enter contractor name','error'); return; }
+
+  const mp = collectManpower(`${pf}-manpower`);
+  const eq = collectEquipment(`${pf}-equipment`);
+  const workRows = pkg==='p1' ? collectWorkRowsP1(pf) : collectWorkRowsP2(pf);
+  const missing = time==='evening' ? collectMissing(`${pf}-missing`) : '';
+  const issues = time==='evening' ? (document.getElementById(`${pf}-issues`)?.value.trim()||'') : '';
+  const notes  = time==='evening' ? (document.getElementById(`${pf}-notes`)?.value.trim()||'')  : '';
+
+  const pkgLabel = pkg==='p1' ? 'Package-1 (Precast)' : 'Package-2 (Finishing)';
+  const reportType = time==='morning' ? 'Morning' : 'Evening';
+
+  const payload = { package: pkgLabel, type: time, date, contractor, manpower: mp.text, manpower_total: mp.total, equipment: eq, works: workRows, missing, issues, notes };
+
+  // WhatsApp message
+  const L = currentLang==='ar';
+  let msg = `--- ${pkgLabel} | ${reportType} Report ---\n`;
+  msg += `Date: ${date}\nContractor: ${contractor}\n`;
+  if (time==='morning') {
+    msg += `\n--- Manpower ---\n${mp.text||'-'}\nTotal: ${mp.total}\n`;
+    msg += `\n--- Equipment ---\n${eq||'-'}\n`;
+    msg += `\n--- Today's Work Plan ---\n`;
+  } else {
+    msg += `\n--- Completed Works ---\n`;
+  }
+  let lastBlock='';
+  workRows.forEach(r => {
+    if (r.block!==lastBlock) { msg+=`\n${r.block}\n`; lastBlock=r.block; }
+    msg+=`  ${L?r.work_ar:r.work_en}: ${r.villas}\n`;
+  });
+  if (!workRows.length) msg+='  -\n';
+  if (time==='evening') {
+    if (missing) msg+=`\n--- Missing Materials ---\n${missing}\n`;
+    if (issues)  msg+=`\n--- Issues & Delays ---\n${issues}\n`;
+    if (notes)   msg+=`\n--- Notes ---\n${notes}\n`;
+  }
+
+  const btn = document.getElementById(`btn-${pf}`);
+  btn.disabled=true;
+  window.open(`https://wa.me/966542220225?text=${encodeURIComponent(msg)}`, '_blank');
+  showToast('Saving to Sheets...','loading');
+
+  try {
+    await sendToSheets(payload);
+    showToast('Saved to Google Sheets ✓','success');
+  } catch(e) {
+    showToast('Sheets save failed','error');
+  }
+  btn.disabled=false;
+}
+
+async function sendToSheets(payload) {
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('YOUR_')) return true;
+  return new Promise(resolve => {
+    const params = new URLSearchParams({ data: JSON.stringify(payload) });
+    const img = new Image();
+    img.onload = img.onerror = () => resolve(true);
+    img.src = APPS_SCRIPT_URL + '?' + params.toString();
+    setTimeout(() => resolve(true), 5000);
+  });
+}
+
+function showToast(msg, type='loading') {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast ${type} show`;
+  if (type!=='loading') setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ─── Init ──────────────────────────────────────────────────
+const today = new Date().toISOString().split('T')[0];
+['p1m','p1e','p2m','p2e'].forEach(p => {
+  const el = document.getElementById(`${p}-date`);
+  if (el) el.value = today;
+});
+setLang('en');
+</script>
+</body>
+</html>
