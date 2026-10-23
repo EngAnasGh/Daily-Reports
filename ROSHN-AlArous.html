@@ -301,6 +301,9 @@
     <button class="submit-btn submit-morning" id="btn-p1m" onclick="sendReport('p1','morning')">
       <span>📤</span> <span data-ar="إرسال تقرير الصباح" data-en="Send Morning Report">Send Morning Report</span>
     </button>
+    <button class="add-btn" style="margin-top:8px;color:var(--red);border-color:var(--red)" onclick="if(confirm('Clear all fields?')) resetForm('p1m')">
+      🗑 <span data-ar="مسح الفورم" data-en="Clear Form">Clear Form</span>
+    </button>
   </div>
 
   <!-- Evening P1 -->
@@ -384,6 +387,9 @@
 
     <button class="submit-btn submit-evening" id="btn-p1e" onclick="sendReport('p1','evening')">
       <span>📤</span> <span data-ar="إرسال تقرير المساء" data-en="Send Evening Report">Send Evening Report</span>
+    </button>
+    <button class="add-btn" style="margin-top:8px;color:var(--red);border-color:var(--red)" onclick="if(confirm('Clear all fields?')) resetForm('p1e')">
+      🗑 <span data-ar="مسح الفورم" data-en="Clear Form">Clear Form</span>
     </button>
   </div>
 </div>
@@ -480,6 +486,9 @@
     <button class="submit-btn submit-morning" id="btn-p2m" onclick="sendReport('p2','morning')">
       <span>📤</span> <span data-ar="إرسال تقرير الصباح" data-en="Send Morning Report">Send Morning Report</span>
     </button>
+    <button class="add-btn" style="margin-top:8px;color:var(--red);border-color:var(--red)" onclick="if(confirm('Clear all fields?')) resetForm('p2m')">
+      🗑 <span data-ar="مسح الفورم" data-en="Clear Form">Clear Form</span>
+    </button>
   </div>
 
   <!-- Evening P2 -->
@@ -560,6 +569,9 @@
 
     <button class="submit-btn submit-evening" id="btn-p2e" onclick="sendReport('p2','evening')">
       <span>📤</span> <span data-ar="إرسال تقرير المساء" data-en="Send Evening Report">Send Evening Report</span>
+    </button>
+    <button class="add-btn" style="margin-top:8px;color:var(--red);border-color:var(--red)" onclick="if(confirm('Clear all fields?')) resetForm('p2e')">
+      🗑 <span data-ar="مسح الفورم" data-en="Clear Form">Clear Form</span>
     </button>
   </div>
 </div>
@@ -1087,11 +1099,88 @@ function collectWorkRowsP2(prefix) {
 }
 
 // ─── Send ──────────────────────────────────────────────────
+// ─── Auto-save to localStorage ────────────────────────────
+function autoSave(pf) {
+  const key = `draft_${pf}`;
+  const data = {
+    contractor: document.getElementById(`${pf}-contractor`)?.value || '',
+    date: document.getElementById(`${pf}-date`)?.value || ''
+  };
+  localStorage.setItem(key, JSON.stringify(data));
+}
+
+function restoreDraft(pf) {
+  const key = `draft_${pf}`;
+  const saved = localStorage.getItem(key);
+  if (!saved) return;
+  const data = JSON.parse(saved);
+  const contractorEl = document.getElementById(`${pf}-contractor`);
+  if (contractorEl && data.contractor) contractorEl.value = data.contractor;
+}
+
+function clearDraft(pf) {
+  localStorage.removeItem(`draft_${pf}`);
+}
+
+// ─── Reset form after send ─────────────────────────────────
+function resetForm(pf) {
+  // Clear contractor
+  const contractorEl = document.getElementById(`${pf}-contractor`);
+  if (contractorEl) contractorEl.value = '';
+
+  // Reset date to today
+  const dateEl = document.getElementById(`${pf}-date`);
+  if (dateEl) dateEl.value = new Date().toISOString().split('T')[0];
+
+  // Reset manpower
+  const mpList = document.getElementById(`${pf}-manpower-list`);
+  if (mpList) mpList.querySelectorAll('.mp-role,.mp-count').forEach(el => el.value='');
+
+  // Reset equipment counts
+  const eqList = document.getElementById(`${pf}-equipment-list`);
+  if (eqList) eqList.querySelectorAll('.eq-count').forEach(el => el.value='');
+
+  // Reset all villa/floor selects to empty
+  document.querySelectorAll(`.villa-entries[data-block^="${pf}"] .vl-villa,
+    .villa-entries[data-block^="${pf}"] .vl-floor,
+    .villa-entries[data-block^="${pf}"] .vl-qty`).forEach(el => el.value='');
+
+  // Reset painting textareas
+  document.querySelectorAll(`.villa-entries[data-block^="${pf}"] textarea`).forEach(el => el.value='');
+
+  // Reset missing/issues/notes if evening
+  const missingList = document.getElementById(`${pf}-missing-list`);
+  if (missingList) missingList.querySelectorAll('input').forEach(el => el.value='');
+  const issuesEl = document.getElementById(`${pf}-issues`);
+  if (issuesEl) issuesEl.value='';
+  const notesEl = document.getElementById(`${pf}-notes`);
+  if (notesEl) notesEl.value='';
+
+  clearDraft(pf);
+  showToast('Form cleared ✓','success');
+}
+
+// ─── Send ──────────────────────────────────────────────────
+let sending = {};
 async function sendReport(pkg, time) {
   const pf = `${pkg}${time==='morning'?'m':'e'}`;
+
+  // Prevent double submit
+  if (sending[pf]) { showToast('Already sending...','loading'); return; }
+
   const date = document.getElementById(`${pf}-date`)?.value || '';
   const contractor = document.getElementById(`${pf}-contractor`)?.value.trim() || '';
-  if (!contractor) { showToast(currentLang==='ar'?'أدخل اسم المقاول':'Enter contractor name','error'); return; }
+
+  // Validation
+  if (!contractor) {
+    showToast(currentLang==='ar'?'أدخل اسم المقاول':'Enter contractor name','error');
+    document.getElementById(`${pf}-contractor`)?.focus();
+    return;
+  }
+  if (!date) {
+    showToast(currentLang==='ar'?'اختر التاريخ':'Select date','error');
+    return;
+  }
 
   const mp = collectManpower(pf);
   const eq = collectEquipment(pf);
@@ -1100,46 +1189,68 @@ async function sendReport(pkg, time) {
   const issues = time==='evening' ? (document.getElementById(`${pf}-issues`)?.value.trim()||'') : '';
   const notes  = time==='evening' ? (document.getElementById(`${pf}-notes`)?.value.trim()||'')  : '';
 
+  // Validate at least one villa selected
+  if (workRows.length === 0) {
+    showToast(currentLang==='ar'?'اختر فيلا واحدة على الأقل':'Select at least one villa','error');
+    return;
+  }
+
   const pkgLabel = pkg==='p1' ? 'Package-1 (Precast)' : 'Package-2 (Finishing)';
   const reportType = time==='morning' ? 'Morning' : 'Evening';
+
+  // Summary line
+  const uniqueVillas = new Set(workRows.flatMap(r => r.villas.split(',').map(v=>v.trim().split(' ')[0])));
+  const summaryLine = `${uniqueVillas.size} villa${uniqueVillas.size!==1?'s':''} | ${mp.total} workers`;
 
   const payload = { package: pkgLabel, type: time, date, contractor, manpower: mp.text, manpower_total: mp.total, equipment: eq, works: workRows, missing, issues, notes };
 
   // WhatsApp message
   const L = currentLang==='ar';
-  let msg = `--- ${pkgLabel} | ${reportType} Report ---\n`;
-  msg += `Date: ${date}\nContractor: ${contractor}\n`;
+  let msg = `*${pkgLabel} | ${reportType} Report*\n`;
+  msg += `📅 Date: ${date}\n`;
+  msg += `👷 Contractor: ${contractor}\n`;
+  msg += `📊 Summary: ${summaryLine}\n`;
   if (time==='morning') {
-    msg += `\n--- Manpower ---\n${mp.text||'-'}\nTotal: ${mp.total}\n`;
-    msg += `\n--- Equipment ---\n${eq||'-'}\n`;
-    msg += `\n--- Today's Work Plan ---\n`;
+    if (mp.text) msg += `\n*Manpower*\n${mp.text}\nTotal: ${mp.total}\n`;
+    if (eq)      msg += `\n*Equipment*\n${eq}\n`;
+    msg += `\n*Today's Work Plan*\n`;
   } else {
-    msg += `\n--- Completed Works ---\n`;
+    msg += `\n*Completed Works*\n`;
   }
   let lastBlock='';
   workRows.forEach(r => {
-    if (r.block!==lastBlock) { msg+=`\n${r.block}\n`; lastBlock=r.block; }
+    if (r.block!==lastBlock) { msg+=`\n*${r.block}*\n`; lastBlock=r.block; }
     msg+=`  ${L?r.work_ar:r.work_en}: ${r.villas}\n`;
   });
-  if (!workRows.length) msg+='  -\n';
   if (time==='evening') {
-    if (missing) msg+=`\n--- Missing Materials ---\n${missing}\n`;
-    if (issues)  msg+=`\n--- Issues & Delays ---\n${issues}\n`;
-    if (notes)   msg+=`\n--- Notes ---\n${notes}\n`;
+    if (missing) msg+=`\n*Missing Materials*\n${missing}\n`;
+    if (issues)  msg+=`\n*Issues & Delays*\n${issues}\n`;
+    if (notes)   msg+=`\n*Notes*\n${notes}\n`;
   }
 
   const btn = document.getElementById(`btn-${pf}`);
-  btn.disabled=true;
+  sending[pf] = true;
+  btn.disabled = true;
+
   window.open(`https://wa.me/966542220225?text=${encodeURIComponent(msg)}`, '_blank');
   showToast('Saving to Sheets...','loading');
 
   try {
     await sendToSheets(payload);
-    showToast('Saved to Google Sheets ✓','success');
+    showToast('Saved ✓ — Report sent!','success');
+    clearDraft(pf);
+    // Ask user if they want to reset
+    setTimeout(() => {
+      if (confirm(currentLang==='ar'?'تم الإرسال! هل تريد مسح الفورم للتقرير الجديد؟':'Sent! Clear form for next report?')) {
+        resetForm(pf);
+      }
+    }, 1500);
   } catch(e) {
     showToast('Sheets save failed','error');
   }
-  btn.disabled=false;
+
+  sending[pf] = false;
+  btn.disabled = false;
 }
 
 async function sendToSheets(payload) {
@@ -1162,8 +1273,16 @@ function showToast(msg, type='loading') {
 // ─── Init ──────────────────────────────────────────────────
 const today = new Date().toISOString().split('T')[0];
 ['p1m','p1e','p2m','p2e'].forEach(p => {
-  const el = document.getElementById(`${p}-date`);
-  if (el) el.value = today;
+  const dateEl = document.getElementById(`${p}-date`);
+  if (dateEl) dateEl.value = today;
+
+  // Auto-save contractor name on input
+  const contractorEl = document.getElementById(`${p}-contractor`);
+  if (contractorEl) {
+    contractorEl.addEventListener('input', () => autoSave(p));
+    // Restore draft
+    restoreDraft(p);
+  }
 });
 setLang('en');
 </script>
