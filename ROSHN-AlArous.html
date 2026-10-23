@@ -1,8 +1,10 @@
 <!DOCTYPE html>
+<!-- v2.1 -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>ROSHN Al-Arous | Daily Site Report</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -973,15 +975,18 @@ function addMissingRow(listId) {
 
 // ─── Collect data ──────────────────────────────────────────
 function collectManpower(pf) {
-  const panel = document.getElementById(`${pf}-manpower-list`);
-  if (!panel) return {text:'', total:0};
+  const listId = `${pf}-manpower-list`;
+  const panel = document.getElementById(listId);
+  if (!panel) { console.warn('Manpower panel not found:', listId); return {text:'', total:0}; }
   const roles = panel.querySelectorAll('.mp-role');
   const counts = panel.querySelectorAll('.mp-count');
   let lines=[], total=0;
   roles.forEach((r,i) => {
     const role=r.value.trim(), count=parseInt(counts[i]?.value)||0;
+    console.log('MP row:', role, count);
     if (role&&count>0) { lines.push(`${role}: ${count}`); total+=count; }
   });
+  console.log('MP result:', lines, total);
   return {text:lines.join(' | '), total};
 }
 function collectEquipment(pf) {
