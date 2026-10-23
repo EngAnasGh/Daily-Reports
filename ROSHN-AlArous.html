@@ -994,7 +994,7 @@ function collectEquipment(pf) {
   if (!panel) return '';
   const names=panel.querySelectorAll('.eq-name'), counts=panel.querySelectorAll('.eq-count');
   let lines=[];
-  names.forEach((n,i) => { if(n.value.trim()) lines.push(`${n.value.trim()}: ${parseInt(counts[i]?.value)||0}`); });
+  names.forEach((n,i) => { const count=parseInt(counts[i]?.value)||0; if(n.value.trim()&&count>0) lines.push(`${n.value.trim()}: ${count}`); });
   return lines.join(' | ');
 }
 function collectMissing(prefix) {
