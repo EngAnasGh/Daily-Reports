@@ -327,6 +327,30 @@
       </div>
     </div>
 
+    <!-- Manpower P1E -->
+    <div class="section">
+      <div class="section-header evening">
+        <div class="section-icon">👷</div>
+        <div>
+          <div class="section-title" data-ar="العمالة" data-en="Manpower">Manpower</div>
+          <div class="section-subtitle" data-ar="أدخل المسمى والعدد" data-en="Enter role and count">Enter role and count</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="mp-section-label">
+          <span data-ar="المسمى" data-en="Role">Role</span>
+          <span data-ar="العدد" data-en="No.">No.</span>
+        </div>
+        <div id="p1e-manpower-list">
+          <div class="mp-free-row"><input type="text" class="mp-role" data-placeholder-ar="مثال: فورمان..." data-placeholder-en="e.g. Foreman..." placeholder="e.g. Foreman..."><input type="number" min="0" placeholder="0" class="mp-count"></div>
+          <div class="mp-free-row"><input type="text" class="mp-role" data-placeholder-ar="مثال: فورمان..." data-placeholder-en="e.g. Foreman..." placeholder="e.g. Foreman..."><input type="number" min="0" placeholder="0" class="mp-count"></div>
+          <div class="mp-free-row"><input type="text" class="mp-role" data-placeholder-ar="مثال: فورمان..." data-placeholder-en="e.g. Foreman..." placeholder="e.g. Foreman..."><input type="number" min="0" placeholder="0" class="mp-count"></div>
+          <div class="mp-free-row"><input type="text" class="mp-role" data-placeholder-ar="مثال: فورمان..." data-placeholder-en="e.g. Foreman..." placeholder="e.g. Foreman..."><input type="number" min="0" placeholder="0" class="mp-count"></div>
+        </div>
+        <button class="add-btn" onclick="addMpRow('p1e-manpower-list')" data-ar="+ أضف صف" data-en="+ Add Row">+ Add Row</button>
+      </div>
+    </div>
+
     <div class="section">
       <div class="section-header evening">
         <div class="section-icon">✅</div>
@@ -509,6 +533,30 @@
             <input type="text" id="p2e-contractor" data-placeholder-ar="اسم الشركة..." data-placeholder-en="Company name..." placeholder="Company name...">
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Manpower P2E -->
+    <div class="section">
+      <div class="section-header evening">
+        <div class="section-icon">👷</div>
+        <div>
+          <div class="section-title" data-ar="العمالة" data-en="Manpower">Manpower</div>
+          <div class="section-subtitle" data-ar="أدخل المسمى والعدد" data-en="Enter role and count">Enter role and count</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="mp-section-label">
+          <span data-ar="المسمى" data-en="Role">Role</span>
+          <span data-ar="العدد" data-en="No.">No.</span>
+        </div>
+        <div id="p2e-manpower-list">
+          <div class="mp-free-row"><input type="text" class="mp-role" data-placeholder-ar="مثال: فورمان..." data-placeholder-en="e.g. Foreman..." placeholder="e.g. Foreman..."><input type="number" min="0" placeholder="0" class="mp-count"></div>
+          <div class="mp-free-row"><input type="text" class="mp-role" data-placeholder-ar="مثال: فورمان..." data-placeholder-en="e.g. Foreman..." placeholder="e.g. Foreman..."><input type="number" min="0" placeholder="0" class="mp-count"></div>
+          <div class="mp-free-row"><input type="text" class="mp-role" data-placeholder-ar="مثال: فورمان..." data-placeholder-en="e.g. Foreman..." placeholder="e.g. Foreman..."><input type="number" min="0" placeholder="0" class="mp-count"></div>
+          <div class="mp-free-row"><input type="text" class="mp-role" data-placeholder-ar="مثال: فورمان..." data-placeholder-en="e.g. Foreman..." placeholder="e.g. Foreman..."><input type="number" min="0" placeholder="0" class="mp-count"></div>
+        </div>
+        <button class="add-btn" onclick="addMpRow('p2e-manpower-list')" data-ar="+ أضف صف" data-en="+ Add Row">+ Add Row</button>
       </div>
     </div>
 
@@ -1132,9 +1180,11 @@ function resetForm(pf) {
   const dateEl = document.getElementById(`${pf}-date`);
   if (dateEl) dateEl.value = new Date().toISOString().split('T')[0];
 
-  // Reset manpower
-  const mpList = document.getElementById(`${pf}-manpower-list`);
-  if (mpList) mpList.querySelectorAll('.mp-role,.mp-count').forEach(el => el.value='');
+  // Reset manpower (morning and evening)
+  [`${pf}-manpower-list`].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.querySelectorAll('.mp-role,.mp-count').forEach(i => i.value='');
+  });
 
   // Reset equipment counts
   const eqList = document.getElementById(`${pf}-equipment-list`);
@@ -1207,14 +1257,15 @@ async function sendReport(pkg, time) {
   // WhatsApp message
   const L = currentLang==='ar';
   let msg = `*${pkgLabel} | ${reportType} Report*\n`;
-  msg += `📅 Date: ${date}\n`;
-  msg += `👷 Contractor: ${contractor}\n`;
-  msg += `📊 Summary: ${summaryLine}\n`;
+  msg += `Date: ${date}\n`;
+  msg += `Contractor: ${contractor}\n`;
+  msg += `Summary: ${summaryLine}\n`;
   if (time==='morning') {
     if (mp.text) msg += `\n*Manpower*\n${mp.text}\nTotal: ${mp.total}\n`;
     if (eq)      msg += `\n*Equipment*\n${eq}\n`;
     msg += `\n*Today's Work Plan*\n`;
   } else {
+    if (mp.text) msg += `\n*Manpower*\n${mp.text}\nTotal: ${mp.total}\n`;
     msg += `\n*Completed Works*\n`;
   }
   let lastBlock='';
